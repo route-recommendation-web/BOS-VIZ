@@ -11,6 +11,7 @@ from colour import Color
 from datetime import datetime
 from textwrap import dedent as d
 import json
+import A_star
 
 # import the css template, and pass the css template into dash
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
@@ -37,7 +38,7 @@ def network_graph(yearRange, AccountToSearch):
     origin_node = list(G.nodes())[5]
     destination_node = list(G.nodes())[100]
     # route = nx.shortest_path(G, origin_node, destination_node, weight="length")
-    route = nx.astar_path(G, origin_node, destination_node, heuristic=dist, weight="length")
+    route = A_star.path(G, origin_node, destination_node, heuristic=dist, weight="length")
     G_edge = list(G.edges)
     for i in range(len(route)-1):
         current_edge = G_edge.index((route[i], route[i+1], 0))
