@@ -6,7 +6,7 @@ from itertools import count
 import networkx as nx
 from networkx.algorithms.shortest_paths.weighted import _weight_function
 
-__all__ = ["astar_path", "astar_path_length"]
+__all__ = ["path", "astar_path_length"]
 
 
 def path(G, source, target, heuristic=None, weight="weight"):
