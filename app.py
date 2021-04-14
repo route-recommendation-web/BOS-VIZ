@@ -30,10 +30,14 @@ def network_graph(yearRange, AccountToSearch):
     ############################################################################################################################################################
     colors = list(Color('lightcoral').range_to(Color('darkred'), len(G.edges())))
     colors = ['rgb' + "(0.9411764705882353, 0.7501960784313725, 0.5701960784313725)" for x in colors]
-
+    def dist(a, b): #using distance between nodes for heuristic
+        (x3, y3) = G.nodes[a]['pos']
+        (x4, y4) = G.nodes[b]['pos']
+        return ((x3 - x4) ** 2 + (y3 - y4) ** 2) ** 0.5
     origin_node = list(G.nodes())[5]
     destination_node = list(G.nodes())[100]
-    route = nx.shortest_path(G, origin_node, destination_node, weight="length")
+    # route = nx.shortest_path(G, origin_node, destination_node, weight="length")
+    route = nx.astar_path(G, origin_node, destination_node, heuristic=dist, weight="length")
     G_edge = list(G.edges)
     for i in range(len(route)-1):
         current_edge = G_edge.index((route[i], route[i+1], 0))
