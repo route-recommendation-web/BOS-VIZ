@@ -17,18 +17,17 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 app.title = "Transaction Network"
 
-YEAR = [2010, 2019]
-ACCOUNT = "A0001"
+YEAR=[2010, 2019]
+ACCOUNT="A0001"
 
-
-#######################################################################################################################
+##############################################################################################################################################################
 def network_graph(yearRange, AccountToSearch):
     G = nx.read_gpickle("brookline.gpickle")
     for node in G.nodes:
-        G.nodes[node]['pos'] = [G.nodes[node]['x'] / 50, G.nodes[node]['y'] / 80]
+        G.nodes[node]['pos'] = [G.nodes[node]['x']/50,G.nodes[node]['y']/80]
 
     traceRecode = []  # contains edge_trace, node_trace, middle_node_trace
-    ###################################################################################################################
+    ############################################################################################################################################################
     colors = list(Color('lightcoral').range_to(Color('darkred'), len(G.edges())))
     colors = ['rgb' + "(0.9411764705882353, 0.7501960784313725, 0.5701960784313725)" for x in colors]
 
@@ -36,9 +35,10 @@ def network_graph(yearRange, AccountToSearch):
     destination_node = list(G.nodes())[100]
     route = nx.shortest_path(G, origin_node, destination_node, weight="length")
     G_edge = list(G.edges)
-    for i in range(len(route) - 1):
-        current_edge = G_edge.index((route[i], route[i + 1], 0))
+    for i in range(len(route)-1):
+        current_edge = G_edge.index((route[i], route[i+1], 0))
         colors[current_edge] = 'rgb' + '(0,0,0)'
+
 
     index = 0
     for edge in G.edges:
@@ -54,14 +54,14 @@ def network_graph(yearRange, AccountToSearch):
                            opacity=0.5)
         traceRecode.append(trace)
         index = index + 1
-    ###################################################################################################################
+    ###############################################################################################################################################################
     node_trace = go.Scatter(x=[], y=[], hovertext=[], text=[], mode='markers+text', textposition="bottom center",
                             hoverinfo="text", marker={'size': 15, 'color': 'LightSkyBlue'})
 
     index = 0
     for node in G.nodes():
         x, y = G.nodes[node]['pos']
-        hovertext = "location: " + str(G.nodes[node]['x']) + "," + str(G.nodes[node]['y']) + "id:" + str(node)
+        hovertext = "location: " + str(G.nodes[node]['x'])+ "," + str(G.nodes[node]['y'])+"id:"+str(node)
         text = ""
         node_trace['x'] += tuple([x])
         node_trace['y'] += tuple([y])
@@ -70,7 +70,7 @@ def network_graph(yearRange, AccountToSearch):
         index = index + 1
 
     traceRecode.append(node_trace)
-    ###################################################################################################################
+    ################################################################################################################################################################
     middle_hover_trace = go.Scatter(x=[], y=[], hovertext=[], mode='markers', hoverinfo="text",
                                     marker={'size': 20, 'color': 'LightSkyBlue'},
                                     opacity=0)
@@ -81,7 +81,7 @@ def network_graph(yearRange, AccountToSearch):
         x1, y1 = G.nodes[edge[1]]['pos']
         hovertext = str(int(G.edges[edge]['length']))
         try:
-            hovertext = str(G.edges[edge]['name']) + ":" + hovertext
+            hovertext = str(G.edges[edge]['name'])+":"+hovertext
         except:
             pass
         middle_hover_trace['x'] += tuple([(x0 + x1) / 2])
@@ -90,7 +90,7 @@ def network_graph(yearRange, AccountToSearch):
         index = index + 1
 
     traceRecode.append(middle_hover_trace)
-    ###################################################################################################################
+    #################################################################################################################################################################
     figure = {
         "data": traceRecode,
         "layout": go.Layout(title='Interactive Map', showlegend=False, hovermode='closest',
@@ -101,9 +101,7 @@ def network_graph(yearRange, AccountToSearch):
                             clickmode='event+select',
                             )}
     return figure
-
-
-#######################################################################################################################
+######################################################################################################################################################################
 # styles: for right side hover/click component
 styles = {
     'pre': {
@@ -213,18 +211,15 @@ app.layout = html.Div([
     )
 ])
 
-
 ###################################callback for left side components
 @app.callback(
     dash.dependencies.Output('my-graph', 'figure'),
     [dash.dependencies.Input('my-range-slider', 'value'), dash.dependencies.Input('input1', 'value')])
-def update_output(value, input1):
+def update_output(value,input1):
     YEAR = value
     ACCOUNT = input1
     return network_graph(value, input1)
     # to update the global variable of YEAR and ACCOUNT
-
-
 ################################callback for right side components
 @app.callback(
     dash.dependencies.Output('hover-data', 'children'),
@@ -238,6 +233,7 @@ def display_hover_data(hoverData):
     [dash.dependencies.Input('my-graph', 'clickData')])
 def display_click_data(clickData):
     return json.dumps(clickData, indent=2)
+
 
 
 if __name__ == '__main__':
