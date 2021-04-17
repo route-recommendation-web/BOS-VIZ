@@ -269,7 +269,7 @@ app.layout = html.Div([
             html.Div(
                 className="eight columns",
                 children=[dcc.Graph(id="my-graph",
-                                    figure=network_graph(1,1))],
+                                    figure=draw_graph(0))],
             ),
 
             #########################################right side two output component
