@@ -2,11 +2,36 @@
 """
 from heapq import heappush, heappop
 from itertools import count
+from heapdict import heapdict
 
 import networkx as nx
+import random
+
 from networkx.algorithms.shortest_paths.weighted import _weight_function
 
 __all__ = ["path", "astar_path_length"]
+
+h = heapdict()
+
+pairs = [None] * 10
+#pairs = [(random.random(), random.random()) for i in range(10)]
+for i in range(10):
+    pairs[i] = [i, i + 10]
+
+d = {}
+for k, v in pairs:
+    h[k] = v
+    d[k] = v
+
+pairs.sort(key=lambda x: x[1], reverse=True)
+h.popitem()
+h[8] = 0.01
+print("lol")
+
+def dijkstra(G, source, target):
+    if source not in G or target not in G:
+        msg = f"Either source {source} or target {target} is not in G"
+        raise nx.NodeNotFound(msg)
 
 
 def path(G, source, target, heuristic=None, weight="weight"):
@@ -76,7 +101,6 @@ def path(G, source, target, heuristic=None, weight="weight"):
     # priority and is guaranteed unique for all nodes in the graph.
     c = count()
     queue = [(0, next(c), source, 0, None)]
-
     # Maps enqueued nodes to distance of discovered paths and the
     # computed heuristics to target. We avoid computing the heuristics
     # more than once and inserting the node into the queue too many times.
@@ -85,9 +109,9 @@ def path(G, source, target, heuristic=None, weight="weight"):
     explored = {}
 
     while queue:
+
         # Pop the smallest item from queue.
         _, __, curnode, dist, parent = pop(queue)
-
         if curnode == target:
             path = [curnode]
             node = parent
