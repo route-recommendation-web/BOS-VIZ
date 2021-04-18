@@ -5,7 +5,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 import networkx as nx
 import plotly.graph_objs as go
-
+import pickle
 import pandas as pd
 from colour import Color
 from datetime import datetime
@@ -100,6 +100,9 @@ def network_graph(yearRange, AccountToSearch):
                             height=600,
                             clickmode='event+select',
                             )}
+    with open('traceRecode.pkl', 'wb') as f:
+        pickle.dump(traceRecode, f)
+
     return figure
 ######################################################################################################################################################################
 # styles: for right side hover/click component
