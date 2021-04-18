@@ -61,7 +61,7 @@ def network_graph(yearRange, AccountToSearch):
     index = 0
     for node in G.nodes():
         x, y = G.nodes[node]['pos']
-        hovertext = "location: " + str(G.nodes[node]['x'])+ "," + str(G.nodes[node]['y'])+"id:"+str(node)
+        hovertext = "location:" + str(G.nodes[node]['x'])+ "," + str(G.nodes[node]['y'])+";nodeid:"+str(node)
         text = ""
         node_trace['x'] += tuple([x])
         node_trace['y'] += tuple([y])
@@ -81,7 +81,7 @@ def network_graph(yearRange, AccountToSearch):
         x1, y1 = G.nodes[edge[1]]['pos']
         hovertext = str(int(G.edges[edge]['length']))
         try:
-            hovertext = str(G.edges[edge]['name'])+":"+hovertext
+            hovertext = str(G.edges[edge]['name'])+":"+hovertext+";startnode:"+str(edge[0])+";endnode:"+str(edge[1])
         except:
             pass
         middle_hover_trace['x'] += tuple([(x0 + x1) / 2])
