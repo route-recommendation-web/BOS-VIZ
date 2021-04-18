@@ -69,7 +69,7 @@ def dijkstra(G, source, target, heuristic="None", weight="weight"):
     pairs = {}
     for node in G.nodes:
         # pairs[node] = [node, INF, None]
-        hd[node] = [INF, None]
+        hd[node] = [INF, (None, None)]
 
     # d = {}
 
@@ -77,7 +77,7 @@ def dijkstra(G, source, target, heuristic="None", weight="weight"):
     #     hd[k] = [v, p]
     #     d[k] = v
 
-    hd[source] = [0, None]
+    hd[source] = [0, (None, None)]
     explored = {}
     enqueued = {}
     while len(hd) != 0:
@@ -85,14 +85,16 @@ def dijkstra(G, source, target, heuristic="None", weight="weight"):
         curnode = temp[0]
         cost = temp[1][0]
         parent = temp[1][1]
-        if curnode[0] is target:
+        if curnode == target:
             path = [curnode]
             node = parent
             while node is not None:
                 path.append(node)
                 node = explored[node]
-            path.reverse()
-            return path
+                if node == source:
+                    path.append(node)
+                    path.reverse()
+                    return path
         if curnode in explored:
             if explored[curnode] is None:
                 continue
@@ -100,11 +102,18 @@ def dijkstra(G, source, target, heuristic="None", weight="weight"):
             if qcost < cost:
                 continue
         explored[curnode] = parent
-        # for neighbor, w in G[curnode].items():
-        #     ncost = dist + weight(curnode, neighbor, w)
-        #     if neighbor
+        for neighbor, w in G[curnode].items():
+            edge_cost = weight(curnode, neighbor, w)
+            if neighbor not in explored:
+                neighbor_cost, parent = hd[neighbor]
+                if neighbor_cost > cost + edge_cost:
+                    hd[neighbor] = [cost + edge_cost, curnode]
+
+            enqueued[neighbor] = cost + edge_cost
 
     raise nx.NetworkXNoPath(f"Node {target} not reachable from {source}")
+
+
 def main():
     # adj = {'c': [('b', 0.32), ('e', 0.17), ('f', 0.91)],
     #        'g': [('d', 0.17), ('e', 0.27), ('h', 0.92)],
@@ -119,8 +128,9 @@ def main():
     G = nx.path_graph(5)
     G = nx.grid_graph(dim=[3, 3])
     nx.set_edge_attributes(G, {e: e[1][0] * 2 for e in G.edges()}, "cost")
-    path = dijkstra(G, (0,0), (2,2), heuristic=None, weight="cost")
+    path = dijkstra(G, (0, 0), (2, 2), heuristic=None, weight="cost")
     print(path)
+
 
 # ----------------------------------------------------------
 
