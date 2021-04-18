@@ -23,6 +23,15 @@ styles = {
         'flex': '1'
     },
     'button': {
-        'margin-top': '10px'
+        'margin-top': '10px',
+        'margin-right': '20px'
+    },
+    'add-block-disable': {
+        'margin-top': '10px',
+        'color': '#555'
+    },
+    'add-block-enable': {
+        'margin-top': '10px',
+        'color': 'red'
     }
 }

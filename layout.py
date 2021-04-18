@@ -31,15 +31,18 @@ layout = html.Div([
                     #     ],
                     #     style={'height': '300px'}
                     # ),
-                    html.Div([
-                        # html.Div(dcc.Input(id='input-on-play', type='text')),
-                        html.Button('play', id='play-val', n_clicks=0, style=styles['button']),
-                        # html.Div(id='container-button-basic',
-                        #          children='Enter a value and press play')
-                    ]),
-                    html.Div([
-                        html.Button('Refresh Data', id='reset', n_clicks=0, style=styles['button']),
-                    ])
+                    html.Div(
+                        className="before start",
+                        children=[
+                            html.Button('play', id='play-val', n_clicks=0, style=styles['button']),
+                            html.Button('Reset Destination', id='reset', n_clicks=0, style=styles['button']),
+                            html.Pre(id='show-dest', style=styles['pre']),
+                            html.Pre(id='edges-blocked', style=styles['pre']),
+                            # html.Div(dcc.Input(id='input-on-play', type='text')),
+                            # html.Div(id='container-button-basic',
+                            # children='Enter a value and press play')
+                        ]
+                    )
                 ]
             ),
 
@@ -47,7 +50,7 @@ layout = html.Div([
             html.Div(
                 className="eight columns",
                 children=[dcc.Graph(id="my-graph",
-                                    figure=utils.draw_graph(0, 0))],
+                                    figure=utils.next_tic(0, 0))],
             ),
 
             #########################################right side two output component
@@ -72,11 +75,11 @@ layout = html.Div([
                             dcc.Markdown(d("""
                              **Click Data**
 
-                             Click on points in the graph.
+                             Click anywhere on the graph.
                              """)),
                             html.Pre(id='click-data', style=styles['pre']),
                             html.Button('set as destination', id='set-dest', n_clicks=0, style=styles['button']),
-                            html.Pre(id='show-dest', style=styles['pre'])
+                            html.Button('add block', id='add-block', n_clicks=0, style=styles['add-block-disable'])
                         ],
                         style={'height': '400px'}
                     )

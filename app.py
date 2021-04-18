@@ -4,6 +4,7 @@ import dash
 import json
 import layout as lo
 import utils
+import styles as st
 from dash.dependencies import Input
 from dash.dependencies import Output
 from dash.dependencies import State
@@ -16,6 +17,7 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 app.title = "Boston Graph"
 app.layout = lo.layout
+styles = st.styles
 
 ###################################callback for left side components
 # @app.callback(
@@ -33,7 +35,7 @@ app.layout = lo.layout
     Input('show-dest', 'children'),
     Input('reset', 'n_clicks'))
 def update_output(n_clicks, new_dest, reset):
-    return utils.draw_graph(n_clicks, reset)
+    return utils.next_tic(n_clicks, reset)
 ################################callback for right side components
 @app.callback(
     Output('hover-data', 'children'),
@@ -51,6 +53,15 @@ def display_click_data(clickData):
     State('click-data', 'children'))
 def set_destination(n_clicks, new_dest):
     return utils.update_destination(new_dest)
-
+@app.callback(
+    Output('add-block', 'style'),
+    Input('add-block', 'n_clicks'))
+def enable_add_block(n_clicks):
+    return styles[utils.enable_add_block(n_clicks)]
+@app.callback(
+    Output('edges-blocked', 'children'),
+    Input('my-graph', 'clickData'))
+def add_block(clickData):
+    return utils.add_block(clickData)
 if __name__ == '__main__':
     app.run_server(debug=True)
