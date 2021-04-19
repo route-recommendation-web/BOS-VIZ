@@ -34,7 +34,7 @@ reset_offset = 0
 global_npc = []
 global_time = 0
 edges_blocked = []
-INF = 999999999
+INF = ((1 << 63) - 1) // 2
 
 # Global state
 restart_flag = False
