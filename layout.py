@@ -35,7 +35,7 @@ layout = html.Div([
                         className="before start",
                         children=[
                             html.Button('play', id='play-val', n_clicks=0, style=styles['button']),
-                            html.Button('Reset Destination', id='reset', n_clicks=0, style=styles['button']),
+                            html.Button('Restart The Game', id='reset', n_clicks=0, style=styles['button']),
                             html.Pre(id='show-dest', style=styles['pre']),
                             html.Pre(id='edges-blocked', style=styles['pre']),
                             # html.Div(dcc.Input(id='input-on-play', type='text')),
@@ -50,7 +50,7 @@ layout = html.Div([
             html.Div(
                 className="eight columns",
                 children=[dcc.Graph(id="my-graph",
-                                    figure=utils.next_tic(0, 0))],
+                                    figure=utils.next_tic(0, 1))],
             ),
 
             #########################################right side two output component
@@ -79,7 +79,7 @@ layout = html.Div([
                              """)),
                             html.Pre(id='click-data', style=styles['pre']),
                             html.Button('set as destination', id='set-dest', n_clicks=0, style=styles['button']),
-                            html.Button('add block', id='add-block', n_clicks=0, style=styles['add-block-disable'])
+                            html.Button('edit block', id='add-block', n_clicks=0, style=styles['add-block-disable'])
                         ],
                         style={'height': '400px'}
                     )
