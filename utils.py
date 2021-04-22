@@ -4,7 +4,7 @@ import pickle
 import random
 import json
 from colour import Color
-
+import math
 # Initializing variables
 MAX_X = 80
 MAX_Y = 50
@@ -34,7 +34,7 @@ reset_offset = 0
 global_npc = []
 global_time = 0
 edges_blocked = []
-INF = ((1 << 63) - 1) // 2
+INF = math.inf
 
 # Global state
 restart_flag = False
@@ -120,6 +120,11 @@ def initialize():
     global global_node_trace
 
     # Initialize local variables
+    global_G = nx.read_gpickle("brookline.gpickle")
+    for node in global_G_const.nodes:
+        global_G_const.nodes[node]['pos'] = [global_G_const.nodes[node]['x'] / MAX_X,
+                                             global_G_const.nodes[node]['y'] / MAX_Y]
+        global_G.nodes[node]['pos'] = [global_G_const.nodes[node]['x'] / MAX_X, global_G_const.nodes[node]['y'] / MAX_Y]
     global_npc = random.sample(global_G.nodes(), 50)
     G = global_G_const
     npc = global_npc
@@ -274,8 +279,13 @@ def add_block(clickData):
             except:
                 edges_blocked.append(edge)  # could be replaced with hash table to improve performance
                 add_block_item(edge_trace, edge)
-                G.edges[edge]['length'] = INF
-            print(G.edges[edge])
+                # G.edges[edge]['length'] = INF
+                try:
+                    G.remove_edge(edge[0],edge[1])
+                    G.remove_edge(edge[1], edge[0])
+                except:
+                    pass
+
 
         # Show blocked edges (debug use, delete it in the PROD environment)
         # merge the edges_blocked with edge_trace to improve performance
