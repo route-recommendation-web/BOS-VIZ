@@ -28,11 +28,6 @@ h.popitem()
 h[8] = 0.01
 print("lol")
 
-def dijkstra(G, source, target):
-    if source not in G or target not in G:
-        msg = f"Either source {source} or target {target} is not in G"
-        raise nx.NodeNotFound(msg)
-
 
 def path(G, source, target, heuristic=None, weight="weight"):
     """Returns a list of nodes in a shortest path between source and target

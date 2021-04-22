@@ -2,8 +2,12 @@ from heapq import heappush, heappop
 from sys import stdin, stdout
 from heapdict import heapdict
 import networkx as nx
+import A_star
+import time
 
 from networkx.algorithms.shortest_paths.weighted import _weight_function
+
+INF = ((1 << 63) - 1) // 2
 
 
 # Dijktra's shortest path algorithm. Prints the path from source to target.
@@ -52,7 +56,6 @@ from networkx.algorithms.shortest_paths.weighted import _weight_function
 # # ----------------------------------------------------------
 
 def dijkstra(G, source, target, heuristic="None", weight="weight"):
-    INF = ((1 << 63) - 1) // 2
     hd = heapdict()
     if source not in G or target not in G:
         msg = f"Either source {source} or target {target} is not in G"
@@ -65,26 +68,18 @@ def dijkstra(G, source, target, heuristic="None", weight="weight"):
 
     weight = _weight_function(G, weight)
 
-    # pairs = [None] * G.number_of_nodes()
-    pairs = {}
     for node in G.nodes:
-        # pairs[node] = [node, INF, None]
-        hd[node] = [INF, (None, None)]
+        hd[node] = [INF, INF, (None, None)]
 
-    # d = {}
-
-    # for k, v, p in pairs:
-    #     hd[k] = [v, p]
-    #     d[k] = v
-
-    hd[source] = [0, (None, None)]
+    hd[source] = [0, 0, (None, None)]
     explored = {}
     enqueued = {}
     while len(hd) != 0:
         temp = hd.popitem()
         curnode = temp[0]
-        cost = temp[1][0]
-        parent = temp[1][1]
+        priority = temp[1][0]
+        cost = temp[1][1]
+        parent = temp[1][2]
         if curnode == target:
             path = [curnode]
             node = parent
@@ -95,21 +90,25 @@ def dijkstra(G, source, target, heuristic="None", weight="weight"):
                     path.append(node)
                     path.reverse()
                     return path
+
         if curnode in explored:
             if explored[curnode] is None:
                 continue
             qcost, h = enqueued[curnode]
             if qcost < cost:
                 continue
+
         explored[curnode] = parent
+
         for neighbor, w in G[curnode].items():
+            h = heuristic(neighbor, target)
             edge_cost = weight(curnode, neighbor, w)
             if neighbor not in explored:
-                neighbor_cost, parent = hd[neighbor]
+                priority, neighbor_cost, parent = hd[neighbor]
                 if neighbor_cost > cost + edge_cost:
-                    hd[neighbor] = [cost + edge_cost, curnode]
+                    hd[neighbor] = [cost + edge_cost + h, cost + edge_cost, curnode]
 
-            enqueued[neighbor] = cost + edge_cost
+            enqueued[neighbor] = cost + edge_cost, h
 
     raise nx.NetworkXNoPath(f"Node {target} not reachable from {source}")
 
@@ -125,10 +124,12 @@ def main():
     #        'e': [('a', 1.75), ('b', 0.82), ('c', 0.17), ('d', 0.29), ('f', 0.33), ('g', 0.27), ('h', 0.18),
     #              ('i', 1.98)],
     #        'b': [('a', 0.95), ('c', 0.32), ('e', 0.82)]}
-    G = nx.path_graph(5)
+    # G = nx.path_graph(5)
     G = nx.grid_graph(dim=[3, 3])
     nx.set_edge_attributes(G, {e: e[1][0] * 2 for e in G.edges()}, "cost")
+    start_time = time.time()
     path = dijkstra(G, (0, 0), (2, 2), heuristic=None, weight="cost")
+    print("--- %s seconds ---" % (time.time() - start_time))
     print(path)
 
 

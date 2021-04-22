@@ -1,17 +1,21 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import dash
+import math
 import dash_core_components as dcc
 import dash_html_components as html
 import networkx as nx
 import plotly.graph_objs as go
-
+import time
 import pandas as pd
 from colour import Color
 from datetime import datetime
 from textwrap import dedent as d
 import json
 import A_star
+import new_Astar
+import osmnx
+
 
 # import the css template, and pass the css template into dash
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
@@ -26,7 +30,7 @@ ACCOUNT = "A0001"
 def network_graph(yearRange, AccountToSearch):
     G = nx.read_gpickle("brookline.gpickle")
     for node in G.nodes:
-        G.nodes[node]['pos'] = [G.nodes[node]['x'] / 50, G.nodes[node]['y'] / 80]
+        G.nodes[node]['pos'] = [G.nodes[node]['x'] / 80, G.nodes[node]['y'] / 50]
 
     traceRecode = []  # contains edge_trace, node_trace, middle_node_trace
     ###################################################################################################################
@@ -34,14 +38,20 @@ def network_graph(yearRange, AccountToSearch):
     colors = ['rgb' + "(0.9411764705882353, 0.7501960784313725, 0.5701960784313725)" for x in colors]
 
     def dist(a, b):  # using distance between nodes for heuristic
-        (x3, y3) = G.nodes[a]['pos']
-        (x4, y4) = G.nodes[b]['pos']
-        return ((x3 - x4) ** 2 + (y3 - y4) ** 2) ** 0.5
+        x2 = G.nodes[a]['x']
+        x3 = G.nodes[b]['x']
+        y2 = G.nodes[a]['y']
+        y3 = G.nodes[b]['y']
+        return osmnx.distance.euclidean_dist_vec(y2, x2, y3, x3)
 
-    origin_node = list(G.nodes())[5]
-    destination_node = list(G.nodes())[100]
+    origin_node = list(G.nodes())[10]
+    destination_node = list(G.nodes())[200]
     # route = nx.shortest_path(G, origin_node, destination_node, weight="length")
-    route = A_star.path(G, origin_node, destination_node, heuristic=dist, weight="length")
+    # route = A_star.path(G, origin_node, destination_node, heuristic=None, weight="length")
+    start_time = time.time()
+    route = new_Astar.dijkstra(G, origin_node, destination_node, heuristic=dist, weight="length")
+    # route = A_star.path(G, origin_node, destination_node, heuristic=dist, weight="length")
+    print("--- %s seconds ---" % (time.time() - start_time))
     G_edge = list(G.edges)
     for i in range(len(route) - 1):
         current_edge = G_edge.index((route[i], route[i + 1], 0))
