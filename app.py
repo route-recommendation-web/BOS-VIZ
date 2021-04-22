@@ -13,7 +13,7 @@ from datetime import datetime
 from textwrap import dedent as d
 import json
 import A_star
-import new_Astar
+import algorithms
 import osmnx
 
 
@@ -37,19 +37,24 @@ def network_graph(yearRange, AccountToSearch):
     colors = list(Color('lightcoral').range_to(Color('darkred'), len(G.edges())))
     colors = ['rgb' + "(0.9411764705882353, 0.7501960784313725, 0.5701960784313725)" for x in colors]
 
+
     def dist(a, b):  # using distance between nodes for heuristic
+        # start_time = time.time()
         x2 = G.nodes[a]['x']
         x3 = G.nodes[b]['x']
         y2 = G.nodes[a]['y']
         y3 = G.nodes[b]['y']
-        return osmnx.distance.euclidean_dist_vec(y2, x2, y3, x3)
+        vec = osmnx.distance.euclidean_dist_vec(y2, x2, y3, x3)
+        # print("--- %s seconds ---" % (time.time() - start_time))
+        return 111139 * vec
 
-    origin_node = list(G.nodes())[10]
-    destination_node = list(G.nodes())[200]
-    # route = nx.shortest_path(G, origin_node, destination_node, weight="length")
+    origin_node = list(G.nodes())[68]
+    destination_node = list(G.nodes())[79]
+
     # route = A_star.path(G, origin_node, destination_node, heuristic=None, weight="length")
     start_time = time.time()
-    route = new_Astar.dijkstra(G, origin_node, destination_node, heuristic=dist, weight="length")
+    # route = nx.shortest_path(G, origin_node, destination_node, weight="length")
+    route = algorithms.a_star(G, origin_node, destination_node, heuristic=dist, weight="length")
     # route = A_star.path(G, origin_node, destination_node, heuristic=dist, weight="length")
     print("--- %s seconds ---" % (time.time() - start_time))
     G_edge = list(G.edges)

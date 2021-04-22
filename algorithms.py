@@ -55,7 +55,7 @@ INF = ((1 << 63) - 1) // 2
 #
 # # ----------------------------------------------------------
 
-def dijkstra(G, source, target, heuristic="None", weight="weight"):
+def a_star(G, source, target, heuristic="None", weight="weight"):
     hd = heapdict()
     if source not in G or target not in G:
         msg = f"Either source {source} or target {target} is not in G"
@@ -101,7 +101,10 @@ def dijkstra(G, source, target, heuristic="None", weight="weight"):
         explored[curnode] = parent
 
         for neighbor, w in G[curnode].items():
-            h = heuristic(neighbor, target)
+            if neighbor in enqueued:
+                qcost, h = enqueued[neighbor]
+            else:
+                h = heuristic(neighbor, target)
             edge_cost = weight(curnode, neighbor, w)
             if neighbor not in explored:
                 priority, neighbor_cost, parent = hd[neighbor]
@@ -128,7 +131,7 @@ def main():
     G = nx.grid_graph(dim=[3, 3])
     nx.set_edge_attributes(G, {e: e[1][0] * 2 for e in G.edges()}, "cost")
     start_time = time.time()
-    path = dijkstra(G, (0, 0), (2, 2), heuristic=None, weight="cost")
+    path = a_star(G, (0, 0), (2, 2), heuristic=None, weight="cost")
     print("--- %s seconds ---" % (time.time() - start_time))
     print(path)
 
