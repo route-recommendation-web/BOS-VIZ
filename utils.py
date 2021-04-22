@@ -4,6 +4,7 @@ import pickle
 import random
 import json
 from colour import Color
+import osmnx
 import math
 # Initializing variables
 MAX_X = 80
@@ -123,7 +124,7 @@ def initialize():
     global_G = nx.read_gpickle("boston.gpickle")
     for node in global_G_const.nodes:
         global_G.nodes[node]['pos'] = [global_G_const.nodes[node]['x'] / MAX_X, global_G_const.nodes[node]['y'] / MAX_Y]
-    global_npc = random.sample(global_G.nodes(), 50)
+    global_npc = random.sample(global_G.nodes(), 20)
     G = global_G_const
     npc = global_npc
     index = 0
@@ -167,6 +168,14 @@ def next_tic(n_clicks, reset):
     # Because the n_clicks for 'refresh data' and 'set as destination' never reset, add this offset to avoid bug
     global reset_offset
     global time_offset
+    def dist(a, b):  # using distance between nodes for heuristic
+        # start_time = time.time()
+        x2 = G.nodes[a]['x']
+        x3 = G.nodes[b]['x']
+        y2 = G.nodes[a]['y']
+        y3 = G.nodes[b]['y']
+        return osmnx.distance.euclidean_dist_vec(y2, x2, y3, x3)
+
     if restart_flag or (reset-reset_offset > 0):
         restart_flag = False
         damage = 0
@@ -193,7 +202,8 @@ def next_tic(n_clicks, reset):
             damage += 1
         else:
             try:
-                route = nx.shortest_path(G, npc_nodes, destination, weight="length")
+                # route = nx.shortest_path(G, npc_nodes, destination, weight="length")
+                route = nx.astar_path(G, npc_nodes, destination, heuristic=dist, weight="length")
                 if len(route) < 2:
                     tmp.append(route[-1])
                 else:
