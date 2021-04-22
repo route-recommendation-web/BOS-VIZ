@@ -19,14 +19,12 @@ app.title = "Transaction Network"
 
 YEAR=[2010, 2019]
 ACCOUNT="A0001"
-MAX_X = 80
-MAX_Y = 50
 
 ##############################################################################################################################################################
 def network_graph(yearRange, AccountToSearch):
     G = nx.read_gpickle("brookline.gpickle")
     for node in G.nodes:
-        G.nodes[node]['pos'] = [G.nodes[node]['x'] / MAX_X, G.nodes[node]['y'] / MAX_Y]
+        G.nodes[node]['pos'] = [G.nodes[node]['x'], G.nodes[node]['y']]
     trace_recode = []  # contains edge_trace, node_trace, middle_node_trace
     # ###################################################################################################################
     colors = list(Color('lightcoral').range_to(Color('darkred'), len(G.edges())))
