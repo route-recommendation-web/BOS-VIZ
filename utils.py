@@ -11,8 +11,8 @@ MAX_Y = 50
 
 # global_G might subject to changes
 # global_G is the constant variable that use to restore blocked edges
-global_G = nx.read_gpickle("brookline.gpickle")
-global_G_const = nx.read_gpickle("brookline.gpickle")
+global_G = nx.read_gpickle("boston.gpickle")
+global_G_const = nx.read_gpickle("boston.gpickle")
 for node in global_G_const.nodes:
     global_G_const.nodes[node]['pos'] = [global_G_const.nodes[node]['x'] / MAX_X, global_G_const.nodes[node]['y'] / MAX_Y]
     global_G.nodes[node]['pos'] = [global_G_const.nodes[node]['x'] / MAX_X, global_G_const.nodes[node]['y'] / MAX_Y]
@@ -42,7 +42,7 @@ add_block_enabled = False
 
 # Methods
 def network_graph(yearRange, AccountToSearch):
-    G = nx.read_gpickle("brookline.gpickle")
+    G = nx.read_gpickle("boston.gpickle")
     for node in G.nodes:
         G.nodes[node]['pos'] = [G.nodes[node]['x'] / MAX_X, G.nodes[node]['y'] / MAX_Y]
     trace_recode = []  # contains edge_trace, node_trace, middle_node_trace
@@ -65,7 +65,7 @@ def network_graph(yearRange, AccountToSearch):
         index = index + 1
     ###################################################################################################################
     node_trace = go.Scatter(x=[], y=[], hovertext=[], text=[], mode='markers+text', textposition="bottom center",
-                            hoverinfo="text", marker={'size': 20, 'color': 'LightSkyBlue'})
+                            hoverinfo="text", marker={'size': 8, 'color': 'LightSkyBlue'})
 
     index = 0
     for node in G.nodes():
@@ -120,10 +120,8 @@ def initialize():
     global global_node_trace
 
     # Initialize local variables
-    global_G = nx.read_gpickle("brookline.gpickle")
+    global_G = nx.read_gpickle("boston.gpickle")
     for node in global_G_const.nodes:
-        global_G_const.nodes[node]['pos'] = [global_G_const.nodes[node]['x'] / MAX_X,
-                                             global_G_const.nodes[node]['y'] / MAX_Y]
         global_G.nodes[node]['pos'] = [global_G_const.nodes[node]['x'] / MAX_X, global_G_const.nodes[node]['y'] / MAX_Y]
     global_npc = random.sample(global_G.nodes(), 50)
     G = global_G_const
@@ -133,9 +131,7 @@ def initialize():
 
     # Add destination to the trace_recode
     trace_recode = set_destination(trace_recode, G)
-
-    node_trace = go.Scatter(x=[], y=[], hovertext=[], text=[], mode='markers+text', textposition="bottom center",
-                            hoverinfo="text", marker={'size': 10, 'color': 'Red'})
+    node_trace = go.Scatter(x=[], y=[], hovertext=[], text=[], mode='markers+text', textposition="bottom center", hoverinfo="text", marker={'size': 10, 'color': 'Red'})
     for npc_nodes in npc:
         x, y = G.nodes[npc_nodes]['pos']
         hover_text = "location: " + str(G.nodes[npc_nodes]['x']) + "," + str(G.nodes[npc_nodes]['y']) + "id:" + str(npc_nodes)
@@ -158,7 +154,6 @@ def initialize():
                             clickmode='event+select',
                             )}
     return figure
-
 
 def next_tic(n_clicks, reset):
     # This function runs whenever user clicks 'play'
