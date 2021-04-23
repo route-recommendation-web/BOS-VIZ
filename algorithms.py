@@ -4,6 +4,7 @@ from heapdict import heapdict
 import networkx as nx
 import A_star
 import time
+import osmnx
 
 from networkx.algorithms.shortest_paths.weighted import _weight_function
 
@@ -65,7 +66,15 @@ def a_star(G, source, target, heuristic="None", weight="weight"):
         # The default heuristic is h=0 - same as Dijkstra's algorithm
         def heuristic(u, v):
             return 0
-
+    else:
+        def heuristic(u,v):
+            x2 = G.nodes[u]['x']
+            x3 = G.nodes[v]['x']
+            y2 = G.nodes[u]['y']
+            y3 = G.nodes[v]['y']
+            vec = osmnx.distance.euclidean_dist_vec(y2, x2, y3, x3)
+            # print("--- %s seconds ---" % (time.time() - start_time))
+            return 111139 * vec
     weight = _weight_function(G, weight)
 
     for node in G.nodes:
