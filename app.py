@@ -19,6 +19,8 @@ app.title = "Transaction Network"
 
 YEAR=[2010, 2019]
 ACCOUNT="A0001"
+edge_color = '#8AB3FF' # '#89DBFF'
+node_color = '#FFDA8A' # '#A7B1FF'
 
 ##############################################################################################################################################################
 def network_graph(yearRange, AccountToSearch):
@@ -26,7 +28,7 @@ def network_graph(yearRange, AccountToSearch):
     for node in G.nodes:
         G.nodes[node]['pos'] = [G.nodes[node]['x'], G.nodes[node]['y']]
     trace_recode = []  # contains edge_trace, node_trace, middle_node_trace
-    # ###################################################################################################################
+    ###################################################################################################################
     colors = list(Color('lightcoral').range_to(Color('darkred'), len(G.edges())))
     colors = ['rgb' + "(0.94, 0.75, 0.57)" for x in colors]
     index = 0
@@ -34,20 +36,19 @@ def network_graph(yearRange, AccountToSearch):
         x0, y0 = G.nodes[edge[0]]['pos']
         x1, y1 = G.nodes[edge[1]]['pos']
         weight = float(G.edges[edge]['length'])
-        trace = go.Scatter(x=tuple([x0, x1, None]), y=tuple([y0, y1, None]),
-                           mode='lines',
-                           line={'width': 3},
-                           marker=dict(color=colors[index]),
-                           # marker={'color': 'Black'},
-                           line_shape='spline',
-                           opacity=0.7)
+        trace = go.Scattergl(x=tuple([x0, x1, None]), y=tuple([y0, y1, None]),
+                             mode='lines',
+                             line={'width': 3},
+                             # marker=dict(color=colors[index]),
+                             marker={'color': edge_color},
+                             # line_shape='spline',
+                             opacity=0.7)
         trace_recode.append(trace)
-        index = index + 1
+        index += 1
     ###################################################################################################################
-    node_trace = go.Scatter(x=[], y=[], hovertext=[], text=[], mode='markers+text', textposition="bottom center",
-                            hoverinfo="text", marker={'size': 9, 'color': 'LightSkyBlue'})
+    node_trace = go.Scattergl(x=[], y=[], hovertext=[], text=[], mode='markers+text', textposition="bottom center",
+                              hoverinfo="text", marker={'size': 9, 'color': node_color})
 
-    index = 0
     for node in G.nodes():
         x, y = G.nodes[node]['pos']
         hover_text = "location:" + str(G.nodes[node]['x'])+ "," + str(G.nodes[node]['y'])+";nodeid:"+str(node)
@@ -56,15 +57,12 @@ def network_graph(yearRange, AccountToSearch):
         node_trace['y'] += tuple([y])
         node_trace['hovertext'] += tuple([hover_text])
         node_trace['text'] += tuple([text])
-        index = index + 1
 
     trace_recode.append(node_trace)
     ###################################################################################################################
-    middle_hover_trace = go.Scatter(x=[], y=[], hovertext=[], mode='markers', hoverinfo="text",
-                                    marker={'size': 20, 'color': 'LightSkyBlue'},
-                                    opacity=0)
+    middle_hover_trace = go.Scattergl(x=[], y=[], hovertext=[], mode='markers', hoverinfo="text",
+                                      marker={'size': 3, 'color': edge_color}, opacity=0)
 
-    index = 0
     for edge in G.edges:
         x0, y0 = G.nodes[edge[0]]['pos']
         x1, y1 = G.nodes[edge[1]]['pos']
@@ -76,10 +74,9 @@ def network_graph(yearRange, AccountToSearch):
         middle_hover_trace['x'] += tuple([(x0 + x1) / 2])
         middle_hover_trace['y'] += tuple([(y0 + y1) / 2])
         middle_hover_trace['hovertext'] += tuple([hover_text])
-        index = index + 1
 
     trace_recode.append(middle_hover_trace)
-
+    ###################################################################################################################
     with open('traceRecode.pkl', 'wb') as f:
         pickle.dump(trace_recode, f)
     ###################################################################################################################
