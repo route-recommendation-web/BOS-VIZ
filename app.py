@@ -22,7 +22,7 @@ ACCOUNT="A0001"
 
 ##############################################################################################################################################################
 def network_graph(yearRange, AccountToSearch):
-    G = nx.read_gpickle("brookline.gpickle")
+    G = nx.read_gpickle("boston.gpickle")
     for node in G.nodes:
         G.nodes[node]['pos'] = [G.nodes[node]['x'], G.nodes[node]['y']]
     trace_recode = []  # contains edge_trace, node_trace, middle_node_trace
