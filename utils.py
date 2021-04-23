@@ -7,8 +7,8 @@ from colour import Color
 import osmnx
 import math
 # Initializing variables
-MAX_X = 80
-MAX_Y = 50
+MAX_X = 1
+MAX_Y = 1
 
 # global_G might subject to changes
 # global_G is the constant variable that use to restore blocked edges
