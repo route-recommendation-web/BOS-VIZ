@@ -27,58 +27,52 @@ def network_graph(yearRange, AccountToSearch):
         G.nodes[node]['pos'] = [G.nodes[node]['x'], G.nodes[node]['y']]
     trace_recode = []  # contains edge_trace, node_trace, middle_node_trace
     # ###################################################################################################################
-    colors = list(Color('lightcoral').range_to(Color('darkred'), len(G.edges())))
-    colors = ['rgb' + "(0.94, 0.75, 0.57)" for x in colors]
-    index = 0
     for edge in G.edges:
         x0, y0 = G.nodes[edge[0]]['pos']
         x1, y1 = G.nodes[edge[1]]['pos']
         weight = float(G.edges[edge]['length'])
-        trace = go.Scatter(x=tuple([x0, x1, None]), y=tuple([y0, y1, None]),
-                           mode='lines',
-                           line={'width': 3},
-                           marker=dict(color=colors[index]),
-                           # marker={'color': 'Black'},
-                           line_shape='spline',
-                           opacity=0.5)
+        trace = go.Scattermapbox(lon=tuple([x0, x1, None]), lat=tuple([y0, y1, None]),
+                                 mode='lines',
+                                 line={'width': 5},
+                                 marker={'color': '#FFE135'},
+                                 )
         trace_recode.append(trace)
-        index = index + 1
     ###################################################################################################################
-    node_trace = go.Scatter(x=[], y=[], hovertext=[], text=[], mode='markers+text', textposition="bottom center",
-                            hoverinfo="text", marker={'size': 20, 'color': 'LightSkyBlue'})
+    # node_trace = go.Scatter(x=[], y=[], hovertext=[], text=[], mode='markers+text', textposition="bottom center",
+    #                         hoverinfo="text", marker={'size': 10, 'color': 'LightSkyBlue'})
 
+    node_trace = go.Scattermapbox(lon=[], lat=[], hovertext=[], text=[], mode="markers+text",
+                                  textposition="bottom center", hoverinfo="text",
+                                  marker={'size': 10, 'color': '#FFE135'})
     index = 0
     for node in G.nodes():
         x, y = G.nodes[node]['pos']
         hover_text = "location:" + str(G.nodes[node]['x'])+ "," + str(G.nodes[node]['y'])+";nodeid:"+str(node)
         text = ""
-        node_trace['x'] += tuple([x])
-        node_trace['y'] += tuple([y])
+        node_trace['lon'] += tuple([x])
+        node_trace['lat'] += tuple([y])
         node_trace['hovertext'] += tuple([hover_text])
         node_trace['text'] += tuple([text])
-        index = index + 1
 
     trace_recode.append(node_trace)
-    ###################################################################################################################
-    middle_hover_trace = go.Scatter(x=[], y=[], hovertext=[], mode='markers', hoverinfo="text",
-                                    marker={'size': 20, 'color': 'LightSkyBlue'},
-                                    opacity=0)
+    # ###################################################################################################################
+    # middle_hover_trace = go.Scatter(x=[], y=[], hovertext=[], mode='markers', hoverinfo="text",
+    #                                 marker={'size': 20, 'color': 'LightSkyBlue'},
+    #                                 opacity=0)
 
-    index = 0
-    for edge in G.edges:
-        x0, y0 = G.nodes[edge[0]]['pos']
-        x1, y1 = G.nodes[edge[1]]['pos']
-        hover_text = str(G.edges[edge]['osmid'])
-        try:
-            hover_text = str(G.edges[edge]['name'])+":"+hover_text+";startnode:"+str(edge[0])+";endnode:"+str(edge[1])
-        except:
-            pass
-        middle_hover_trace['x'] += tuple([(x0 + x1) / 2])
-        middle_hover_trace['y'] += tuple([(y0 + y1) / 2])
-        middle_hover_trace['hovertext'] += tuple([hover_text])
-        index = index + 1
-
-    trace_recode.append(middle_hover_trace)
+    # for edge in G.edges:
+    #     x0, y0 = G.nodes[edge[0]]['pos']
+    #     x1, y1 = G.nodes[edge[1]]['pos']
+    #     hover_text = str(G.edges[edge]['osmid'])
+    #     try:
+    #         hover_text = str(G.edges[edge]['name'])+":"+hover_text+";startnode:"+str(edge[0])+";endnode:"+str(edge[1])
+    #     except:
+    #         pass
+    #     middle_hover_trace['x'] += tuple([(x0 + x1) / 2])
+    #     middle_hover_trace['y'] += tuple([(y0 + y1) / 2])
+    #     middle_hover_trace['hovertext'] += tuple([hover_text])
+    #
+    # trace_recode.append(middle_hover_trace)
 
     with open('traceRecode.pkl', 'wb') as f:
         pickle.dump(trace_recode, f)
@@ -87,11 +81,16 @@ def network_graph(yearRange, AccountToSearch):
         "data": trace_recode,
         "layout": go.Layout(title='Interactive Map', showlegend=False, hovermode='closest',
                             margin={'b': 40, 'l': 40, 'r': 40, 't': 40},
-                            xaxis={'showgrid': False, 'zeroline': False, 'showticklabels': False},
-                            yaxis={'showgrid': False, 'zeroline': False, 'showticklabels': False},
+                            # xaxis={'showgrid': False, 'zeroline': False, 'showticklabels': False},
+                            # yaxis={'showgrid': False, 'zeroline': False, 'showticklabels': False},
+                            # )}
                             height=600,
                             clickmode='event+select',
-                            )}
+                            mapbox = {
+                                'center': {'lon': -71.13, 'lat': 42.32},
+                                'style': "stamen-terrain",
+                                'zoom': 12.4})
+    }
     return figure
 ######################################################################################################################################################################
 # styles: for right side hover/click component
