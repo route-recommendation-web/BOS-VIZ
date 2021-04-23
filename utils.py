@@ -6,16 +6,19 @@ import json
 from colour import Color
 import osmnx
 import math
+
 # Initializing variables
 MAX_X = 80
 MAX_Y = 50
 
 # global_G might subject to changes
 # global_G is the constant variable that use to restore blocked edges
-global_G = nx.read_gpickle("boston.gpickle")
-global_G_const = nx.read_gpickle("boston.gpickle")
+gp_filename = "boston.gpickle"
+global_G = nx.read_gpickle(gp_filename)
+global_G_const = nx.read_gpickle(gp_filename)
 for node in global_G_const.nodes:
-    global_G_const.nodes[node]['pos'] = [global_G_const.nodes[node]['x'] / MAX_X, global_G_const.nodes[node]['y'] / MAX_Y]
+    global_G_const.nodes[node]['pos'] = [global_G_const.nodes[node]['x'] / MAX_X,
+                                         global_G_const.nodes[node]['y'] / MAX_Y]
     global_G.nodes[node]['pos'] = [global_G_const.nodes[node]['x'] / MAX_X, global_G_const.nodes[node]['y'] / MAX_Y]
 
 # Read in global trace recode
@@ -41,13 +44,14 @@ INF = math.inf
 restart_flag = False
 add_block_enabled = False
 
+
 # Methods
-def network_graph(yearRange, AccountToSearch):
-    G = nx.read_gpickle("boston.gpickle")
+def network_graph():
+    G = nx.read_gpickle(gp_filename)
     for node in G.nodes:
         G.nodes[node]['pos'] = [G.nodes[node]['x'] / MAX_X, G.nodes[node]['y'] / MAX_Y]
     trace_recode = []  # contains edge_trace, node_trace, middle_node_trace
-    # ###################################################################################################################
+    # #################################################################################################################
     colors = list(Color('lightcoral').range_to(Color('darkred'), len(G.edges())))
     colors = ['rgb' + "(0.94, 0.75, 0.57)" for x in colors]
     index = 0
@@ -114,6 +118,8 @@ def network_graph(yearRange, AccountToSearch):
                             clickmode='event+select',
                             )}
     # return figure
+
+
 #######################################################################################################################
 def initialize():
     global global_npc
@@ -121,7 +127,7 @@ def initialize():
     global global_node_trace
 
     # Initialize local variables
-    global_G = nx.read_gpickle("boston.gpickle")
+    global_G = nx.read_gpickle(gp_filename)
     for node in global_G_const.nodes:
         global_G.nodes[node]['pos'] = [global_G_const.nodes[node]['x'] / MAX_X, global_G_const.nodes[node]['y'] / MAX_Y]
     global_npc = random.sample(global_G.nodes(), 20)
@@ -132,10 +138,12 @@ def initialize():
 
     # Add destination to the trace_recode
     trace_recode = set_destination(trace_recode, G)
-    node_trace = go.Scatter(x=[], y=[], hovertext=[], text=[], mode='markers+text', textposition="bottom center", hoverinfo="text", marker={'size': 10, 'color': 'Red'})
+    node_trace = go.Scatter(x=[], y=[], hovertext=[], text=[], mode='markers+text', textposition="bottom center",
+                            hoverinfo="text", marker={'size': 10, 'color': 'Red'})
     for npc_nodes in npc:
         x, y = G.nodes[npc_nodes]['pos']
-        hover_text = "location: " + str(G.nodes[npc_nodes]['x']) + "," + str(G.nodes[npc_nodes]['y']) + "id:" + str(npc_nodes)
+        hover_text = "location: " + str(G.nodes[npc_nodes]['x']) + "," + str(G.nodes[npc_nodes]['y']) + "id:" + str(
+            npc_nodes)
         text = ""
         node_trace['x'] += tuple([x])
         node_trace['y'] += tuple([y])
@@ -147,7 +155,7 @@ def initialize():
 
     figure = {
         "data": trace_recode,
-        "layout": go.Layout(title='Total Damage: ' + str(damage)+" Time: 0", showlegend=False, hovermode='closest',
+        "layout": go.Layout(title='Total Damage: ' + str(damage) + " Time: 0", showlegend=False, hovermode='closest',
                             margin={'b': 40, 'l': 40, 'r': 40, 't': 40},
                             xaxis={'showgrid': False, 'zeroline': False, 'showticklabels': False},
                             yaxis={'showgrid': False, 'zeroline': False, 'showticklabels': False},
@@ -155,6 +163,7 @@ def initialize():
                             clickmode='event+select',
                             )}
     return figure
+
 
 def next_tic(n_clicks, reset):
     # This function runs whenever user clicks 'play'
@@ -168,6 +177,7 @@ def next_tic(n_clicks, reset):
     # Because the n_clicks for 'refresh data' and 'set as destination' never reset, add this offset to avoid bug
     global reset_offset
     global time_offset
+
     def dist(a, b):  # using distance between nodes for heuristic
         # start_time = time.time()
         x2 = G.nodes[a]['x']
@@ -176,7 +186,7 @@ def next_tic(n_clicks, reset):
         y3 = G.nodes[b]['y']
         return osmnx.distance.euclidean_dist_vec(y2, x2, y3, x3)
 
-    if restart_flag or (reset-reset_offset > 0):
+    if restart_flag or (reset - reset_offset > 0):
         restart_flag = False
         damage = 0
         reset_offset = reset
@@ -202,8 +212,11 @@ def next_tic(n_clicks, reset):
             damage += 1
         else:
             try:
+                start_time = time.time()
                 # route = nx.shortest_path(G, npc_nodes, destination, weight="length")
-                route = nx.astar_path(G, npc_nodes, destination, heuristic=dist, weight="length")
+                # route = nx.astar_path(G, npc_nodes, destination, heuristic=dist, weight="length")
+                route = algorithms.a_star(G, npc_nodes, destination, heuristic=dist, weight="length")
+                print("--- %s seconds ---" % (time.time() - start_time))
                 if len(route) < 2:
                     tmp.append(route[-1])
                 else:
@@ -216,7 +229,8 @@ def next_tic(n_clicks, reset):
     global_npc = tmp
     for npc_nodes in npc:
         x, y = G.nodes[npc_nodes]['pos']
-        hover_text = "location: " + str(G.nodes[npc_nodes]['x']) + "," + str(G.nodes[npc_nodes]['y']) + "id:" + str(npc_nodes)
+        hover_text = "location: " + str(G.nodes[npc_nodes]['x']) + "," + str(G.nodes[npc_nodes]['y']) + "id:" + str(
+            npc_nodes)
         text = ""
         node_trace['x'] += tuple([x])
         node_trace['y'] += tuple([y])
@@ -227,10 +241,10 @@ def next_tic(n_clicks, reset):
     global_node_trace = node_trace
     trace_recode += edge_trace
     trace_recode.append(global_node_trace)
-    global_time = n_clicks-time_offset
+    global_time = n_clicks - time_offset
     figure = {
         "data": trace_recode,
-        "layout": go.Layout(title='Total Damage: ' + str(damage)+" Time: "+str(global_time), showlegend=False,
+        "layout": go.Layout(title='Total Damage: ' + str(damage) + " Time: " + str(global_time), showlegend=False,
                             hovermode='closest',
                             margin={'b': 40, 'l': 40, 'r': 40, 't': 40},
                             xaxis={'showgrid': False, 'zeroline': False, 'showticklabels': False},
@@ -286,11 +300,10 @@ def add_block(clickData):
                 add_block_item(edge_trace, edge)
                 # G.edges[edge]['length'] = INF
                 try:
-                    G.remove_edge(edge[0],edge[1])
+                    G.remove_edge(edge[0], edge[1])
                     G.remove_edge(edge[1], edge[0])
                 except:
                     pass
-
 
         # Show blocked edges (debug use, delete it in the PROD environment)
         # merge the edges_blocked with edge_trace to improve performance
@@ -313,7 +326,7 @@ def add_block(clickData):
     trace_recode.append(global_node_trace)
     figure = {
         "data": trace_recode,
-        "layout": go.Layout(title='Total Damage: ' + str(damage)+" Time: "+str(global_time), showlegend=False,
+        "layout": go.Layout(title='Total Damage: ' + str(damage) + " Time: " + str(global_time), showlegend=False,
                             hovermode='closest',
                             margin={'b': 40, 'l': 40, 'r': 40, 't': 40},
                             xaxis={'showgrid': False, 'zeroline': False, 'showticklabels': False},
