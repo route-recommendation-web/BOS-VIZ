@@ -40,12 +40,12 @@ def network_graph(yearRange, AccountToSearch):
                            marker=dict(color=colors[index]),
                            # marker={'color': 'Black'},
                            line_shape='spline',
-                           opacity=0.5)
+                           opacity=0.7)
         trace_recode.append(trace)
         index = index + 1
     ###################################################################################################################
     node_trace = go.Scatter(x=[], y=[], hovertext=[], text=[], mode='markers+text', textposition="bottom center",
-                            hoverinfo="text", marker={'size': 20, 'color': 'LightSkyBlue'})
+                            hoverinfo="text", marker={'size': 9, 'color': 'LightSkyBlue'})
 
     index = 0
     for node in G.nodes():
