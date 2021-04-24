@@ -8,6 +8,7 @@ import styles as st
 from dash.dependencies import Input
 from dash.dependencies import Output
 from dash.dependencies import State
+
 # import pandas as pd
 # from datetime import datetime
 # import A_star
@@ -19,7 +20,8 @@ app.title = "Boston Graph"
 app.layout = lo.layout
 styles = st.styles
 
-###################################callback for left side components
+
+# ##################################callback for left side components
 # @app.callback(
 #     dash.dependencies.Output('my-graph', 'figure'),
 #     [dash.dependencies.Input('my-range-slider', 'value'), dash.dependencies.Input('input1', 'value')])
@@ -35,25 +37,30 @@ styles = st.styles
     Output('my-graph', 'figure'),
     Input('play-val', 'n_clicks'),
     Input('show-dest', 'children'),
+    Input('switch', 'n_clicks'),
     Input('reset', 'n_clicks'),
     Input('my-graph', 'clickData'),
     State('add-block', 'style'))
-def update_output(n_clicks, new_dest, reset, clickData, style):
+def update_output(n_clicks, new_dest, reset, clickData, style, switch):
     ctx = dash.callback_context
-    if not ctx.triggered: button_id = 'No clicks yet'
-    else: button_id = ctx.triggered[0]['prop_id']
+    if not ctx.triggered:
+        button_id = 'No clicks yet'
+    else:
+        button_id = ctx.triggered[0]['prop_id']
     if button_id == 'my-graph.clickData' and style == styles['add-block-enable']:
         # add block
         return utils.add_block(clickData)
     elif button_id == 'play-val.n_clicks' or button_id == 'reset.n_clicks':
         # next tic
         return utils.next_tic(n_clicks, reset)
+    elif button_id == 'switch.n_clicks':
+        return utils.switch_algo()
     else:
         # no update
         return dash.no_update
 
 
-################################callback for right side components
+# ###############################callback for right side components
 @app.callback(
     Output('hover-data', 'children'),
     Input('my-graph', 'hoverData'))
@@ -81,6 +88,8 @@ def set_destination(n_clicks, new_dest):
     Input('add-block', 'n_clicks'))
 def enable_add_block(n_clicks):
     return styles[utils.enable_add_block(n_clicks)]
+
+
 # @app.callback(
 #     Output('edges-blocked', 'children'),
 #     Input('my-graph', 'clickData'))

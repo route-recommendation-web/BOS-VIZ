@@ -3,17 +3,18 @@ import styles as st
 import dash_core_components as dcc
 import utils
 from textwrap import dedent as d
+
 styles = st.styles
 layout = html.Div([
-    #########################Title
+    # ########################Title
     html.Div([html.H1("Boston Graph")],
              className="row",
              style={'textAlign': "center"}),
-    #############################################################################################define the row
+    # ############################################################################################define the row
     html.Div(
         className="row",
         children=[
-            ##############################################left side two input components
+            # #############################################left side two input components
             html.Div(
                 className="two columns",
                 children=[
@@ -36,6 +37,7 @@ layout = html.Div([
                         children=[
                             html.Button('play', id='play-val', n_clicks=0, style=styles['button']),
                             html.Button('Restart The Game', id='reset', n_clicks=0, style=styles['button']),
+                            html.Button('Switch Algorithm', id='switch', n_clicks=0, style=styles['button']),
                             html.Pre(id='show-dest', style=styles['pre']),
                             html.Pre(id='edges-blocked', style=styles['pre']),
                             # html.Div(dcc.Input(id='input-on-play', type='text')),
@@ -46,14 +48,14 @@ layout = html.Div([
                 ]
             ),
 
-            ############################################middle graph component
+            # ###########################################middle graph component
             html.Div(
                 className="eight columns",
                 children=[dcc.Graph(id="my-graph",
                                     figure=utils.next_tic(0, 1))],
             ),
 
-            #########################################right side two output component
+            # ########################################right side two output component
             html.Div(
                 className="two columns",
                 children=[
