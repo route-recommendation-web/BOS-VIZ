@@ -6,23 +6,24 @@ import json
 from colour import Color
 import osmnx
 import math
-# Initializing variables
-MAX_X = 1
-MAX_Y = 1
-
-# global_G might subject to changes
-# global_G is the constant variable that use to restore blocked edges
+# Initializing variables ##############################################################################################
+#######################################################################################################################
+# Choose city
+city = 'brookline'
 map_setting = dict(
                     boston=dict(gpickle='boston.gpickle', traceRecode='traceRecode_boston.pkl'),
                     brookline=dict(gpickle='brookline.gpickle', traceRecode='traceRecode_brookline.pkl')
                     )
-gpickle = map_setting['brookline']['gpickle']
-traceRecode = map_setting['brookline']['traceRecode']
+gpickle = map_setting[city]['gpickle']
+traceRecode = map_setting[city]['traceRecode']
+
+# global_G might subject to changes
+# global_G is the constant variable that use to restore blocked edges
 global_G = nx.read_gpickle(gpickle)
 global_G_const = nx.read_gpickle(gpickle)
 for node in global_G_const.nodes:
-    global_G_const.nodes[node]['pos'] = [global_G_const.nodes[node]['x'] / MAX_X, global_G_const.nodes[node]['y'] / MAX_Y]
-    global_G.nodes[node]['pos'] = [global_G_const.nodes[node]['x'] / MAX_X, global_G_const.nodes[node]['y'] / MAX_Y]
+    global_G_const.nodes[node]['pos'] = [global_G_const.nodes[node]['x'], global_G_const.nodes[node]['y']]
+    global_G.nodes[node]['pos'] = [global_G_const.nodes[node]['x'], global_G_const.nodes[node]['y']]
 
 # Read in global trace recode
 # traceRecode.pkl is generated from the "pickle file renderer' branch, check out that file for details
@@ -47,13 +48,14 @@ INF = math.inf
 restart_flag = False
 add_block_enabled = False
 
-# Methods
+# Renderer (not used) #################################################################################################
+#######################################################################################################################
 def network_graph(yearRange, AccountToSearch):
     G = nx.read_gpickle(gpickle)
     for node in G.nodes:
-        G.nodes[node]['pos'] = [G.nodes[node]['x'] / MAX_X, G.nodes[node]['y'] / MAX_Y]
+        G.nodes[node]['pos'] = [G.nodes[node]['x'], G.nodes[node]['y']]
     trace_recode = []  # contains edge_trace, node_trace, middle_node_trace
-    # ###################################################################################################################
+
     colors = list(Color('lightcoral').range_to(Color('darkred'), len(G.edges())))
     colors = ['rgb' + "(0.94, 0.75, 0.57)" for x in colors]
     index = 0
@@ -70,10 +72,9 @@ def network_graph(yearRange, AccountToSearch):
                            opacity=0.5)
         trace_recode.append(trace)
         index = index + 1
-    ###################################################################################################################
+
     node_trace = go.Scatter(x=[], y=[], hovertext=[], text=[], mode='markers+text', textposition="bottom center",
                             hoverinfo="text", marker={'size': 8, 'color': 'LightSkyBlue'})
-
     index = 0
     for node in G.nodes():
         x, y = G.nodes[node]['pos']
@@ -84,13 +85,10 @@ def network_graph(yearRange, AccountToSearch):
         node_trace['hovertext'] += tuple([hover_text])
         node_trace['text'] += tuple([text])
         index = index + 1
-
     trace_recode.append(node_trace)
-    ###################################################################################################################
-    middle_hover_trace = go.Scatter(x=[], y=[], hovertext=[], mode='markers', hoverinfo="text",
-                                    marker={'size': 20, 'color': 'LightSkyBlue'},
-                                    opacity=0)
 
+    middle_hover_trace = go.Scatter(x=[], y=[], hovertext=[], mode='markers', hoverinfo="text",
+                                    marker={'size': 20, 'color': 'LightSkyBlue'}, opacity=0)
     index = 0
     for edge in G.edges:
         x0, y0 = G.nodes[edge[0]]['pos']
@@ -109,7 +107,6 @@ def network_graph(yearRange, AccountToSearch):
 
     with open(traceRecode, 'wb') as f:
         pickle.dump(trace_recode, f)
-    ###################################################################################################################
     figure = {
         "data": trace_recode,
         "layout": go.Layout(title='Interactive Map', showlegend=False, hovermode='closest',
@@ -120,6 +117,8 @@ def network_graph(yearRange, AccountToSearch):
                             clickmode='event+select',
                             )}
     # return figure
+
+# Methods #############################################################################################################
 #######################################################################################################################
 def initialize():
     global global_npc
@@ -129,7 +128,7 @@ def initialize():
     # Initialize local variables
     global_G = nx.read_gpickle(gpickle)
     for node in global_G_const.nodes:
-        global_G.nodes[node]['pos'] = [global_G_const.nodes[node]['x'] / MAX_X, global_G_const.nodes[node]['y'] / MAX_Y]
+        global_G.nodes[node]['pos'] = [global_G_const.nodes[node]['x'], global_G_const.nodes[node]['y']]
     global_npc = random.sample(global_G.nodes(), 20)
     G = global_G_const
     npc = global_npc
@@ -255,7 +254,7 @@ def update_destination(new_dest):
         if dest != '':
             destination = int(dest)
             restart_flag = True
-            return u'''The destination is not reset to \n{}'''.format(destination)
+            return u'''The destination is now reset to \n{}'''.format(destination)
         else:
             return u'''You can't select a street as your detination'''
     return u'''Current destination is {}'''.format(destination)
@@ -297,22 +296,6 @@ def add_block(clickData):
                 except:
                     pass
 
-
-        # Show blocked edges (debug use, delete it in the PROD environment)
-        # merge the edges_blocked with edge_trace to improve performance
-        # if edges_blocked is not []:
-        #     for edge in edges_blocked:
-        #         x0, y0 = G.nodes[edge[0]]['pos']
-        #         x1, y1 = G.nodes[edge[1]]['pos']
-        #         weight = float(G.edges[edge]['length'])
-        #         trace = go.Scatter(x=tuple([x0, x1, None]), y=tuple([y0, y1, None]),
-        #                            mode='lines',
-        #                            line={'width': 3},
-        #                            # marker=dict(color=colors[index]),
-        #                            marker={'color': 'Red'},
-        #                            line_shape='spline',
-        #                            opacity=0.5)
-        #         edge_trace.append(trace)
     global_G = G
     global_edge_trace = edge_trace
     trace_recode = trace_recode + edge_trace

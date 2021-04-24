@@ -45,7 +45,7 @@ def update_output(n_clicks, new_dest, reset, clickData, style):
     if button_id == 'my-graph.clickData' and style == styles['add-block-enable']:
         # add block
         return utils.add_block(clickData)
-    elif button_id == 'play-val.n_clicks' or button_id == 'reset.n_clicks':
+    elif button_id == 'play-val.n_clicks' or button_id == 'reset.n_clicks' or button_id == 'show-dest.children':
         # next tic
         return utils.next_tic(n_clicks, reset)
     else:
