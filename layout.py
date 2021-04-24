@@ -37,9 +37,9 @@ layout = html.Div([
                         children=[
                             html.Button('play', id='play-val', n_clicks=0, style=styles['button']),
                             html.Button('Restart The Game', id='reset', n_clicks=0, style=styles['button']),
-                            html.Button('Switch Algorithm', id='switch', n_clicks=0, style=styles['button']),
+                            html.Button('Switch Algorithm', id='switch-algorithm', n_clicks=0, style=styles['button']),
                             html.Pre(id='show-dest', style=styles['pre']),
-                            html.Pre(id='edges-blocked', style=styles['pre']),
+                            html.Pre(id='show-algorithm', style=styles['pre']),
                             # html.Div(dcc.Input(id='input-on-play', type='text')),
                             # html.Div(id='container-button-basic',
                             # children='Enter a value and press play')

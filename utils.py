@@ -3,76 +3,68 @@ import plotly.graph_objs as go
 import pickle
 import random
 import json
-from colour import Color
 import osmnx
 import math
-import algorithms
-import time
+from colour import Color
 # Initializing variables ##############################################################################################
 #######################################################################################################################
 # Choose city
-city = 'brookline'
-map_setting = dict(
-                    boston=dict(gpickle='boston.gpickle', traceRecode='traceRecode_boston.pkl'),
-                    brookline=dict(gpickle='brookline.gpickle', traceRecode='traceRecode_brookline.pkl')
-                    )
-gp_filename = map_setting[city]['gpickle']
-traceRecode = map_setting[city]['traceRecode']
+global_city = 'boston'
+global_file_dict = dict(boston=dict(gpickle='boston.gpickle', tracerecode='trace_recode_boston.pkl'),
+                        brookline=dict(gpickle='brookline.gpickle', tracerecode='trace_recode_brookline.pkl'))
+global_gp_file = global_file_dict[global_city]['gpickle']
+global_tracerecode_file = global_file_dict[global_city]['tracerecode']
 
-algo_choice = 0
-
-# global_G might subject to changes
-# global_G is the constant variable that use to restore blocked edges
-global_G = nx.read_gpickle(gp_filename)
-global_G_const = nx.read_gpickle(gp_filename)
-for node in global_G_const.nodes:
-    global_G_const.nodes[node]['pos'] = [global_G_const.nodes[node]['x'], global_G_const.nodes[node]['y']]
-    global_G.nodes[node]['pos'] = [global_G_const.nodes[node]['x'], global_G_const.nodes[node]['y']]
+# global_graph might subject to changes
+# global_graph_const is the constant variable that use to restore blocked edges
+global_graph_const = nx.read_gpickle(global_gp_file)
+global_graph = global_graph_const
 
 # Read in global trace recode
 # traceRecode.pkl is generated from the "pickle file renderer' branch, check out that file for details
 # global_node_trace is global npc nodes Scatter
 # global_edge_trace is global blocked edges Scatter
-with open(traceRecode, 'rb') as f:
+with open(global_tracerecode_file, 'rb') as f:
     global_trace_recode = pickle.load(f)
 global_node_trace = None
 global_edge_trace = []
 
 # Other variables/consts
-damage = 0
-destination = list(global_G.nodes())[5]
-time_offset = 0
-reset_offset = 0
+global_damage = 0
+global_destination = list(global_graph.nodes())[5]
+global_time_offset = 0
+global_reset_offset = 0
 global_npc = []
 global_time = 0
-edges_blocked = []
+global_block_list = []
 INF = math.inf
 
 # Global state
-restart_flag = False
-add_block_enabled = False
+global_restart_flag = False
+global_enable_add_block = False
+
+# Global algo
+global_algorithm = 'default'
 
 # Renderer (not used) #################################################################################################
 #######################################################################################################################
 def network_graph():
-    G = nx.read_gpickle(gp_filename)
-    for node in G.nodes:
-        G.nodes[node]['pos'] = [G.nodes[node]['x'], G.nodes[node]['y']]
+    graph = global_graph_const
     trace_recode = []  # contains edge_trace, node_trace, middle_node_trace
 
-    colors = list(Color('lightcoral').range_to(Color('darkred'), len(G.edges())))
+    colors = list(Color('lightcoral').range_to(Color('darkred'), len(graph.edges())))
     colors = ['rgb' + "(0.94, 0.75, 0.57)" for x in colors]
     index = 0
-    for edge in G.edges:
-        x0, y0 = G.nodes[edge[0]]['pos']
-        x1, y1 = G.nodes[edge[1]]['pos']
-        weight = float(G.edges[edge]['length'])
+    for edge in graph.edges:
+        x0, y0 = graph.nodes[edge[0]]['x'], graph.nodes[edge[0]]['y']
+        x1, y1 = graph.nodes[edge[1]]['x'], graph.nodes[edge[0]]['y']
+        # weight = float(graph.edges[edge]['length'])
         trace = go.Scatter(x=tuple([x0, x1, None]), y=tuple([y0, y1, None]),
                            mode='lines',
                            line={'width': 3},
                            marker=dict(color=colors[index]),
                            # marker={'color': 'Black'},
-                           line_shape='spline',
+                           # line_shape='spline',
                            opacity=0.5)
         trace_recode.append(trace)
         index = index + 1
@@ -80,9 +72,10 @@ def network_graph():
     node_trace = go.Scatter(x=[], y=[], hovertext=[], text=[], mode='markers+text', textposition="bottom center",
                             hoverinfo="text", marker={'size': 8, 'color': 'LightSkyBlue'})
     index = 0
-    for node in G.nodes():
-        x, y = G.nodes[node]['pos']
-        hover_text = "location: " + str(G.nodes[node]['x']) + "," + str(G.nodes[node]['y']) + "id :" + str(node)
+    for graph_node in graph.nodes():
+        x, y = graph.nodes[graph_node]['x'], graph.nodes[graph_node]['y']
+        hover_text = "location: " + str(graph.nodes[graph_node]['x']) + "," + \
+                     str(graph.nodes[graph_node]['y']) + "id :" + str(graph_node)
         text = ""
         node_trace['x'] += tuple([x])
         node_trace['y'] += tuple([y])
@@ -94,12 +87,12 @@ def network_graph():
     middle_hover_trace = go.Scatter(x=[], y=[], hovertext=[], mode='markers', hoverinfo="text",
                                     marker={'size': 20, 'color': 'LightSkyBlue'}, opacity=0)
     index = 0
-    for edge in G.edges:
-        x0, y0 = G.nodes[edge[0]]['pos']
-        x1, y1 = G.nodes[edge[1]]['pos']
-        hover_text = str(G.edges[edge]['osmid'])
+    for edge in graph.edges:
+        x0, y0 = graph.nodes[edge[0]]['x'], graph.nodes[edge[0]]['y']
+        x1, y1 = graph.nodes[edge[1]]['x'], graph.nodes[edge[1]]['y']
+        hover_text = str(graph.edges[edge]['osmid'])
         try:
-            hover_text = str(G.edges[edge]['name']) + ":" + hover_text
+            hover_text = str(graph.edges[edge]['name']) + ":" + hover_text
         except:
             pass
         middle_hover_trace['x'] += tuple([(x0 + x1) / 2])
@@ -109,241 +102,200 @@ def network_graph():
 
     trace_recode.append(middle_hover_trace)
 
-    with open(traceRecode, 'wb') as f:
+    with open(global_tracerecode_file, 'wb') as f:
         pickle.dump(trace_recode, f)
-    figure = {
-        "data": trace_recode,
-        "layout": go.Layout(title='Interactive Map', showlegend=False, hovermode='closest',
-                            margin={'b': 40, 'l': 40, 'r': 40, 't': 40},
-                            xaxis={'showgrid': False, 'zeroline': False, 'showticklabels': False},
-                            yaxis={'showgrid': False, 'zeroline': False, 'showticklabels': False},
-                            height=600,
-                            clickmode='event+select',
-                            )}
+    # figure = {
+    #     "data": trace_recode,
+    #     "layout": go.Layout(title='Interactive Map', showlegend=False, hovermode='closest',
+    #                         margin={'b': 40, 'l': 40, 'r': 40, 't': 40},
+    #                         xaxis={'showgrid': False, 'zeroline': False, 'showticklabels': False},
+    #                         yaxis={'showgrid': False, 'zeroline': False, 'showticklabels': False},
+    #                         height=600,
+    #                         clickmode='event+select',
+    #                         )}
     # return figure
 
 # Methods #############################################################################################################
 #######################################################################################################################
 def initialize():
     global global_npc
-    global global_G
+    global global_graph
     global global_node_trace
 
+    # Reset global_graph since it might has been changed
+    global_graph = global_graph_const
+    global_npc = random.sample(global_graph.nodes(), 20)
+
     # Initialize local variables
-    global_G = nx.read_gpickle(gp_filename)
-    for node in global_G_const.nodes:
-        global_G.nodes[node]['pos'] = [global_G_const.nodes[node]['x'], global_G_const.nodes[node]['y']]
-    global_npc = random.sample(global_G.nodes(), 20)
-    G = global_G_const
-    npc = global_npc
-    index = 0
+    graph = global_graph_const
     trace_recode = global_trace_recode.copy()
 
     # Add destination to the trace_recode
-    trace_recode = set_destination(trace_recode, G)
-    node_trace = go.Scatter(x=[], y=[], hovertext=[], text=[], mode='markers+text', textposition="bottom center",
-                            hoverinfo="text", marker={'size': 10, 'color': 'Red'})
-    for npc_nodes in npc:
-        x, y = G.nodes[npc_nodes]['pos']
-        hover_text = "location: " + str(G.nodes[npc_nodes]['x']) + "," + str(G.nodes[npc_nodes]['y']) + "id:" + str(
-            npc_nodes)
-        text = ""
-        node_trace['x'] += tuple([x])
-        node_trace['y'] += tuple([y])
-        node_trace['hovertext'] += tuple([hover_text])
-        node_trace['text'] += tuple([text])
-        index = index + 1
-    global_node_trace = node_trace
-    trace_recode.append(node_trace)
+    trace_recode = draw_destination(trace_recode, graph)
+    # Add npc nodes
+    npc_trace = draw_npc(global_npc, graph)
+    global_node_trace = npc_trace
+    trace_recode.append(global_node_trace)
 
+    # Return figure
     figure = {
         "data": trace_recode,
-        "layout": go.Layout(title='Total Damage: ' + str(damage) + " Time: 0", showlegend=False, hovermode='closest',
-                            margin={'b': 40, 'l': 40, 'r': 40, 't': 40},
-                            xaxis={'showgrid': False, 'zeroline': False, 'showticklabels': False},
-                            yaxis={'showgrid': False, 'zeroline': False, 'showticklabels': False},
-                            height=600,
-                            clickmode='event+select',
-                            )}
+        "layout": update_layout(global_damage, 0)
+    }
     return figure
 
 
 def next_tic(n_clicks, reset):
     # This function runs whenever user clicks 'play'
-    global restart_flag
-    global damage
+    global global_restart_flag
+    global global_damage
     global global_npc
-    global edges_blocked
+    global global_block_list
     global global_node_trace
     global global_edge_trace
     global global_time
     # Because the n_clicks for 'refresh data' and 'set as destination' never reset, add this offset to avoid bug
-    global reset_offset
-    global time_offset
+    global global_reset_offset
+    global global_time_offset
 
-    def dist(a, b):  # using distance between nodes for heuristic
-        # start_time = time.time()
-        x2 = G.nodes[a]['x']
-        x3 = G.nodes[b]['x']
-        y2 = G.nodes[a]['y']
-        y3 = G.nodes[b]['y']
-        return osmnx.distance.euclidean_dist_vec(y2, x2, y3, x3)
-
-    if restart_flag or (reset - reset_offset > 0):
-        restart_flag = False
-        damage = 0
-        reset_offset = reset
-        time_offset = n_clicks
+    if global_restart_flag or (reset - global_reset_offset > 0):
+        global_restart_flag = False
+        global_damage = 0
+        global_reset_offset = reset
+        global_time_offset = n_clicks
         global_edge_trace = []
-        edges_blocked = []
+        global_block_list = []
         return initialize()
 
-    G = global_G
+    # Declare local variables
     trace_recode = global_trace_recode.copy()
-    edge_trace = global_edge_trace.copy()
+
+    # Local method
+    def heuristic(a, b):  # using distance between nodes for heuristic
+        # start_time = time.time()
+        x2 = global_graph.nodes[a]['x']
+        x3 = global_graph.nodes[b]['x']
+        y2 = global_graph.nodes[a]['y']
+        y3 = global_graph.nodes[b]['y']
+        return osmnx.distance.euclidean_dist_vec(y2, x2, y3, x3)
 
     # Add destination to the trace_recode
-    trace_recode = set_destination(trace_recode, G)
+    trace_recode = draw_destination(trace_recode, global_graph)
 
-    index = 0
-    tmp = []
-    npc = global_npc
-    node_trace = go.Scatter(x=[], y=[], hovertext=[], text=[], mode='markers+text', textposition="bottom center",
-                            hoverinfo="text", marker={'size': 10, 'color': 'Red'})
-    for npc_nodes in npc:
-        if npc_nodes == destination:
-            damage += 1
+    # Update npc locations
+    npc_updated = []
+    for npc_nodes in global_npc:
+        if npc_nodes == global_destination:
+            global_damage += 1
         else:
             try:
-                start_time = time.time()
-                # route = nx.shortest_path(G, npc_nodes, destination, weight="length")
-                # route = nx.astar_path(G, npc_nodes, destination, heuristic=dist, weight="length")
-                if algo_choice == 0:
-                    route = algorithms.a_star(G, npc_nodes, destination, heuristic=dist, weight="length")
+                # route = nx.shortest_path(graph, npc_nodes, destination, weight="length")
+                if global_algorithm == 'default':
+                    route = nx.astar_path(global_graph, npc_nodes, global_destination, heuristic=heuristic,
+                                          weight="length")
                 else:
-                    route = algorithms.a_star(G, npc_nodes, destination, heuristic=None, weight="length")
-                print("--- %s seconds ---" % (time.time() - start_time))
+                    # Change algorithm here
+                    route = nx.astar_path(global_graph, npc_nodes, global_destination, heuristic=heuristic,
+                                          weight="length")
                 if len(route) < 2:
-                    tmp.append(route[-1])
+                    npc_updated.append(route[-1])
                 else:
-                    tmp.append(route[1])
+                    npc_updated.append(route[1])
             except:
                 print("no path")
+    global_npc = npc_updated
+    if len(global_npc) == 0:
+        global_restart_flag = True
 
-    if len(npc) == 0:
-        restart_flag = True
-    global_npc = tmp
-    for npc_nodes in npc:
-        x, y = G.nodes[npc_nodes]['pos']
-        hover_text = "location: " + str(G.nodes[npc_nodes]['x']) + "," + str(G.nodes[npc_nodes]['y']) + "id:" + str(
-            npc_nodes)
-        text = ""
-        node_trace['x'] += tuple([x])
-        node_trace['y'] += tuple([y])
-        node_trace['hovertext'] += tuple([hover_text])
-        node_trace['text'] += tuple([text])
-        index = index + 1
+    npc_trace = draw_npc(npc_updated, global_graph)  # npc fig
+    global_node_trace = npc_trace  # update global npc fig
+    trace_recode += global_edge_trace  # add edge blocking trace to fig
+    trace_recode.append(global_node_trace)  # add npc trace to fig
 
-    global_node_trace = node_trace
-    trace_recode += edge_trace
-    trace_recode.append(global_node_trace)
-    global_time = n_clicks - time_offset
+    # Update time
+    global_time = n_clicks - global_time_offset
+
+    # Return figure
     figure = {
         "data": trace_recode,
-        "layout": go.Layout(title='Total Damage: ' + str(damage) + " Time: " + str(global_time), showlegend=False,
-                            hovermode='closest',
-                            margin={'b': 40, 'l': 40, 'r': 40, 't': 40},
-                            xaxis={'showgrid': False, 'zeroline': False, 'showticklabels': False},
-                            yaxis={'showgrid': False, 'zeroline': False, 'showticklabels': False},
-                            height=600,
-                            clickmode='event+select',
-                            )}
+        "layout": update_layout(global_damage, global_time)
+    }
     return figure
 
 
 def update_destination(new_dest):
-    global destination
-    global restart_flag
-    if new_dest is not None:
+    global global_destination
+    global global_restart_flag
+    try:
         dest = json.loads(new_dest)['points'][0]['hovertext'].partition(';nodeid:')[2]
         if dest != '':
-            destination = int(dest)
-            restart_flag = True
-            return u'''The destination is now reset to \n{}'''.format(destination)
+            global_destination = int(dest)
+            global_restart_flag = True
+            show_dest = u'''The destination is now reset to \n{}'''.format(global_destination)
         else:
-            return u'''You can't select a street as your destination'''
-    return u'''Current destination is {}'''.format(destination)
-
-
-def switch_algo():
-    global algo_choice
-    if algo_choice == 0:
-        print("Switching to Dijkstra")
-        algo_choice = 1
-    elif algo_choice == 1:
-        print("Switching to A*")
-        algo_choice = 0
+            show_dest = u'''You can't select a street as your detination'''
+    except:
+        show_dest = u'''Current destination is {}'''.format(global_destination)
+    return show_dest
 
 
 def enable_add_block(n_clicks):
-    global add_block_enabled
-    if (n_clicks != 0): add_block_enabled = not add_block_enabled
-    return 'add-block-enable' if add_block_enabled else 'add-block-disable'
+    global global_enable_add_block
+    if n_clicks != 0:
+        global_enable_add_block = not global_enable_add_block
+    return 'add-block-enable' if global_enable_add_block else 'add-block-disable'
 
 
 def add_block(clickData):
-    global edges_blocked
-    global global_G
+    global global_block_list
+    global global_graph
     global global_edge_trace
 
     trace_recode = global_trace_recode.copy()
     edge_trace = global_edge_trace
-    G = global_G
+    graph = global_graph
+
     # Add destination to the trace_recode
-    trace_recode = set_destination(trace_recode, G)
-    if add_block_enabled and clickData is not None:
+    trace_recode = draw_destination(trace_recode, graph)
+
+    if global_enable_add_block and clickData is not None:
         click_data = clickData['points'][0]['hovertext']
         if ';startnode:' in click_data:
             start_end = click_data.partition(';startnode:')[2].partition(';endnode:')
             edge = (int(start_end[0]), int(start_end[2]), 0)
             try:
-                edge_idx = edges_blocked.index(edge)
-                edges_blocked.pop(edge_idx)
+                edge_idx = global_block_list.index(edge)
+                global_block_list.pop(edge_idx)
                 edge_trace.pop(edge_idx)
-                G.edges[edge]['length'] = global_G_const.edges[edge]['length']
+                graph.edges[edge]['length'] = global_graph_const.edges[edge]['length']
             except:
-                edges_blocked.append(edge)  # could be replaced with hash table to improve performance
+                global_block_list.append(edge)  # could be replaced with hash table to improve performance
                 add_block_item(edge_trace, edge)
-                # G.edges[edge]['length'] = INF
+                graph.edges[edge]['length'] = INF
                 try:
-                    G.remove_edge(edge[0], edge[1])
-                    G.remove_edge(edge[1], edge[0])
+                    graph.remove_edge(edge[0], edge[1])
+                    graph.remove_edge(edge[1], edge[0])
                 except:
                     pass
 
-    global_G = G
+    global_graph = graph
     global_edge_trace = edge_trace
     trace_recode = trace_recode + edge_trace
     trace_recode.append(global_node_trace)
     figure = {
         "data": trace_recode,
-        "layout": go.Layout(title='Total Damage: ' + str(damage) + " Time: " + str(global_time), showlegend=False,
-                            hovermode='closest',
-                            margin={'b': 40, 'l': 40, 'r': 40, 't': 40},
-                            xaxis={'showgrid': False, 'zeroline': False, 'showticklabels': False},
-                            yaxis={'showgrid': False, 'zeroline': False, 'showticklabels': False},
-                            height=600,
-                            clickmode='event+select',
-                            )}
+        "layout": update_layout(global_damage, global_time)
+    }
     return figure
 
 
 def add_block_item(edge_trace, edge):
-    G = global_G_const
-    x0, y0 = G.nodes[edge[0]]['pos']
-    x1, y1 = G.nodes[edge[1]]['pos']
-    weight = float(G.edges[edge]['length'])
-    trace = go.Scatter(x=tuple([x0, x1, None]), y=tuple([y0, y1, None]),
+    graph = global_graph_const
+    x0, y0 = graph.nodes[edge[0]]['x'], graph.nodes[edge[0]]['y']
+    x1, y1 = graph.nodes[edge[1]]['x'], graph.nodes[edge[1]]['y']
+    weight = float(graph.edges[edge]['length'])
+    trace = go.Scatter(x=tuple([x0, x1, None]),
+                       y=tuple([y0, y1, None]),
                        mode='lines',
                        line={'width': 3},
                        # marker=dict(color=colors[index]),
@@ -353,12 +305,44 @@ def add_block_item(edge_trace, edge):
     edge_trace.append(trace)
 
 
-def set_destination(trace_recode, G):
-    x, y = G.nodes[destination]['pos']
-    hover_text = "location: " + str(G.nodes[destination]['x']) + "," + str(G.nodes[destination]['y']) + "id: " + str(
-        destination)
+def draw_destination(trace_recode, graph):
+    x, y = graph.nodes[global_destination]['x'], graph.nodes[global_destination]['y']
+    hover_text = "Destination" + " id: " + str(global_destination)
     text = "Main Base"
     trace_recode = [(go.Scatter(x=tuple([x]), y=tuple([y]), hovertext=tuple([hover_text]), mode='markers+text',
                                 text=tuple([text]), textposition="bottom center", hoverinfo="text",
-                                marker={'size': 40, 'color': 'Green'}))] + trace_recode
+                                marker={'size': 30, 'color': 'Green'}))] + trace_recode
     return trace_recode
+
+
+def draw_npc(npc, graph):
+    npc_trace = go.Scatter(x=[], y=[], name="npc", hovertext=[], text=[], mode='markers+text',
+                           textposition="bottom center", hoverinfo="text", marker={'size': 10, 'color': 'Red'})
+    for npc_nodes in npc:
+        x, y = graph.nodes[npc_nodes]['x'], graph.nodes[npc_nodes]['y']
+        hover_text = "npc id:" + str(npc_nodes)
+        text = ""
+        npc_trace['x'] += tuple([x])
+        npc_trace['y'] += tuple([y])
+        npc_trace['hovertext'] += tuple([hover_text])
+        npc_trace['text'] += tuple([text])
+
+    return npc_trace
+
+
+def update_layout(damage, time):
+    layout = go.Layout(title='Total Damage: ' + str(damage) + ' Time: ' + str(time),
+                       showlegend=False,
+                       hovermode='closest',
+                       margin={'b': 40, 'l': 40, 'r': 40, 't': 40},
+                       xaxis={'showgrid': False, 'zeroline': False, 'showticklabels': False},
+                       yaxis={'showgrid': False, 'zeroline': False, 'showticklabels': False},
+                       height=600,
+                       clickmode='event+select')
+    return layout
+
+
+def switch_algorithm():
+    global global_algorithm
+    global_algorithm = 'a_star' if global_algorithm == 'default' else 'default'
+    return u'''The program is currently using the {} algorithm'''.format(global_algorithm)
