@@ -12,8 +12,14 @@ MAX_Y = 1
 
 # global_G might subject to changes
 # global_G is the constant variable that use to restore blocked edges
-global_G = nx.read_gpickle("boston.gpickle")
-global_G_const = nx.read_gpickle("boston.gpickle")
+map_setting = dict(
+                    boston=dict(gpickle='boston.gpickle', traceRecode='traceRecode_boston.pkl'),
+                    brookline=dict(gpickle='brookline.gpickle', traceRecode='traceRecode_brookline.pkl')
+                    )
+gpickle = map_setting['brookline']['gpickle']
+traceRecode = map_setting['brookline']['traceRecode']
+global_G = nx.read_gpickle(gpickle)
+global_G_const = nx.read_gpickle(gpickle)
 for node in global_G_const.nodes:
     global_G_const.nodes[node]['pos'] = [global_G_const.nodes[node]['x'] / MAX_X, global_G_const.nodes[node]['y'] / MAX_Y]
     global_G.nodes[node]['pos'] = [global_G_const.nodes[node]['x'] / MAX_X, global_G_const.nodes[node]['y'] / MAX_Y]
@@ -22,7 +28,7 @@ for node in global_G_const.nodes:
 # traceRecode.pkl is generated from the "pickle file renderer' branch, check out that file for details
 # global_node_trace is global npc nodes Scatter
 # global_edge_trace is global blocked edges Scatter
-with open('traceRecode.pkl', 'rb') as f:
+with open(traceRecode, 'rb') as f:
     global_trace_recode = pickle.load(f)
 global_node_trace = None
 global_edge_trace = []
@@ -43,7 +49,7 @@ add_block_enabled = False
 
 # Methods
 def network_graph(yearRange, AccountToSearch):
-    G = nx.read_gpickle("boston.gpickle")
+    G = nx.read_gpickle(gpickle)
     for node in G.nodes:
         G.nodes[node]['pos'] = [G.nodes[node]['x'] / MAX_X, G.nodes[node]['y'] / MAX_Y]
     trace_recode = []  # contains edge_trace, node_trace, middle_node_trace
@@ -101,7 +107,7 @@ def network_graph(yearRange, AccountToSearch):
 
     trace_recode.append(middle_hover_trace)
 
-    with open('traceRecode.pkl', 'wb') as f:
+    with open(traceRecode, 'wb') as f:
         pickle.dump(trace_recode, f)
     ###################################################################################################################
     figure = {
@@ -121,7 +127,7 @@ def initialize():
     global global_node_trace
 
     # Initialize local variables
-    global_G = nx.read_gpickle("boston.gpickle")
+    global_G = nx.read_gpickle(gpickle)
     for node in global_G_const.nodes:
         global_G.nodes[node]['pos'] = [global_G_const.nodes[node]['x'] / MAX_X, global_G_const.nodes[node]['y'] / MAX_Y]
     global_npc = random.sample(global_G.nodes(), 20)
