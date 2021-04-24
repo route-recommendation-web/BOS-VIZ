@@ -14,7 +14,7 @@ __all__ = ["path", "astar_path_length"]
 h = heapdict()
 
 pairs = [None] * 10
-#pairs = [(random.random(), random.random()) for i in range(10)]
+# pairs = [(random.random(), random.random()) for i in range(10)]
 for i in range(10):
     pairs[i] = [i, i + 10]
 

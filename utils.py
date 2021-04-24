@@ -11,9 +11,11 @@ import math
 MAX_X = 80
 MAX_Y = 50
 
+algo_choice = 0
+
 # global_G might subject to changes
 # global_G is the constant variable that use to restore blocked edges
-gp_filename = "boston.gpickle"
+gp_filename = "brookline.gpickle"
 global_G = nx.read_gpickle(gp_filename)
 global_G_const = nx.read_gpickle(gp_filename)
 for node in global_G_const.nodes:
@@ -25,7 +27,7 @@ for node in global_G_const.nodes:
 # traceRecode.pkl is generated from the "pickle file renderer' branch, check out that file for details
 # global_node_trace is global npc nodes Scatter
 # global_edge_trace is global blocked edges Scatter
-with open('traceRecode.pkl', 'rb') as f:
+with open('traceRecode.pkl copy', 'rb') as f:
     global_trace_recode = pickle.load(f)
 global_node_trace = None
 global_edge_trace = []
@@ -215,7 +217,10 @@ def next_tic(n_clicks, reset):
                 start_time = time.time()
                 # route = nx.shortest_path(G, npc_nodes, destination, weight="length")
                 # route = nx.astar_path(G, npc_nodes, destination, heuristic=dist, weight="length")
-                route = algorithms.a_star(G, npc_nodes, destination, heuristic=dist, weight="length")
+                if algo_choice == 0:
+                    route = algorithms.a_star(G, npc_nodes, destination, heuristic=dist, weight="length")
+                else:
+                    route = algorithms.a_star(G, npc_nodes, destination, heuristic=None, weight="length")
                 print("--- %s seconds ---" % (time.time() - start_time))
                 if len(route) < 2:
                     tmp.append(route[-1])
@@ -265,8 +270,18 @@ def update_destination(new_dest):
             restart_flag = True
             return u'''The destination is not reset to \n{}'''.format(destination)
         else:
-            return u'''You can't select a street as your detination'''
+            return u'''You can't select a street as your destination'''
     return u'''Current destination is {}'''.format(destination)
+
+
+def switch_algo():
+    global algo_choice
+    if algo_choice == 0:
+        print("Switching to Dijkstra")
+        algo_choice = 1
+    elif algo_choice == 1:
+        print("Switching to A*")
+        algo_choice = 0
 
 
 def enable_add_block(n_clicks):

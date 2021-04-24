@@ -37,10 +37,11 @@ styles = st.styles
     Output('my-graph', 'figure'),
     Input('play-val', 'n_clicks'),
     Input('show-dest', 'children'),
+    Input('switch', 'n_clicks'),
     Input('reset', 'n_clicks'),
     Input('my-graph', 'clickData'),
     State('add-block', 'style'))
-def update_output(n_clicks, new_dest, reset, clickData, style):
+def update_output(n_clicks, new_dest, reset, clickData, style, switch):
     ctx = dash.callback_context
     if not ctx.triggered:
         button_id = 'No clicks yet'
@@ -52,6 +53,8 @@ def update_output(n_clicks, new_dest, reset, clickData, style):
     elif button_id == 'play-val.n_clicks' or button_id == 'reset.n_clicks':
         # next tic
         return utils.next_tic(n_clicks, reset)
+    elif button_id == 'switch.n_clicks':
+        return utils.switch_algo()
     else:
         # no update
         return dash.no_update
