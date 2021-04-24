@@ -22,7 +22,7 @@ ACCOUNT="A0001"
 
 ##############################################################################################################################################################
 def network_graph(yearRange, AccountToSearch):
-    G = nx.read_gpickle("boston.gpickle")
+    G = nx.read_gpickle("brookline.gpickle")
     for node in G.nodes:
         G.nodes[node]['pos'] = [G.nodes[node]['x'], G.nodes[node]['y']]
     trace_recode = []  # contains edge_trace, node_trace, middle_node_trace
@@ -45,7 +45,7 @@ def network_graph(yearRange, AccountToSearch):
         index = index + 1
     ###################################################################################################################
     node_trace = go.Scatter(x=[], y=[], hovertext=[], text=[], mode='markers+text', textposition="bottom center",
-                            hoverinfo="text", marker={'size': 9, 'color': 'LightSkyBlue'})
+                            hoverinfo="text", marker={'size': 13, 'color': 'LightSkyBlue'})
 
     index = 0
     for node in G.nodes():
@@ -61,7 +61,7 @@ def network_graph(yearRange, AccountToSearch):
     trace_recode.append(node_trace)
     ###################################################################################################################
     middle_hover_trace = go.Scatter(x=[], y=[], hovertext=[], mode='markers', hoverinfo="text",
-                                    marker={'size': 20, 'color': 'LightSkyBlue'},
+                                    marker={'size': 3, 'color': 'LightSkyBlue'},
                                     opacity=0)
 
     index = 0
