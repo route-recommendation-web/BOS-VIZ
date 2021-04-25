@@ -123,12 +123,12 @@ def initialize():
     global global_npc
     global global_graph
     global global_node_trace
-
+    global global_block_list
     # Reset global_graph since it might has been changed
-    global_graph = global_graph_const
+    global_graph = global_graph_const.copy()
     global_npc = random.sample(global_graph.nodes(), 20)
     # global_npc = global_graph[63547858]
-
+    global_block_list = []
     # Initialize local variables
     graph = global_graph_const
     trace_recode = global_trace_recode.copy()
@@ -280,15 +280,15 @@ def add_block(clickData):
         if ';startnode:' in click_data:
             start_end = click_data.partition(';startnode:')[2].partition(';endnode:')
             edge = (int(start_end[0]), int(start_end[2]), 0)
-            try:
-                edge_idx = global_block_list.index(edge)
-                global_block_list.pop(edge_idx)
-                edge_trace.pop(edge_idx)
-                graph.edges[edge]['length'] = global_graph_const.edges[edge]['length']
-            except:
+           # try:
+           #      edge_idx = global_block_list.index(edge)
+           #      global_block_list.pop(edge_idx)
+           #      edge_trace.pop(edge_idx)
+           #      graph.edges[edge]['length'] = global_graph_const.edges[edge]['length']
+            if edge not in global_block_list:
                 global_block_list.append(edge)  # could be replaced with hash table to improve performance
                 add_block_item(edge_trace, edge)
-                graph.edges[edge]['length'] = INF
+                # graph.edges[edge]['length'] = INF
                 try:
                     graph.remove_edge(edge[0], edge[1])
                     graph.remove_edge(edge[1], edge[0])
