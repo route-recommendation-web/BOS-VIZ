@@ -10,6 +10,7 @@ from networkx.algorithms.shortest_paths.weighted import _weight_function
 
 INF = ((1 << 63) - 1) // 2
 
+
 def a_star(G, source, target, heuristic="None", weight="weight"):
     hd = heapdict()
     if source not in G or target not in G:
@@ -56,6 +57,8 @@ def a_star(G, source, target, heuristic="None", weight="weight"):
         explored[curnode] = parent
 
         for neighbor, w in G[curnode].items():
+            if neighbor == target and source == curnode:
+                return [curnode, target]
             if neighbor in enqueued:
                 qcost, h = enqueued[neighbor]
             else:

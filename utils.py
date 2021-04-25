@@ -6,10 +6,12 @@ import json
 import osmnx
 import math
 from colour import Color
+import algorithms
+import A_star
 # Initializing variables ##############################################################################################
 #######################################################################################################################
 # Choose city
-global_city = 'boston'
+global_city = 'brookline'
 global_file_dict = dict(boston=dict(gpickle='boston.gpickle', tracerecode='trace_recode_boston.pkl'),
                         brookline=dict(gpickle='brookline.gpickle', tracerecode='trace_recode_brookline.pkl'))
 global_gp_file = global_file_dict[global_city]['gpickle']
@@ -125,6 +127,7 @@ def initialize():
     # Reset global_graph since it might has been changed
     global_graph = global_graph_const
     global_npc = random.sample(global_graph.nodes(), 20)
+    # global_npc = global_graph[63547858]
 
     # Initialize local variables
     graph = global_graph_const
@@ -153,6 +156,7 @@ def next_tic(n_clicks, reset):
     global global_node_trace
     global global_edge_trace
     global global_time
+    global global_npc_step
     # Because the n_clicks for 'refresh data' and 'set as destination' never reset, add this offset to avoid bug
     global global_reset_offset
     if global_restart_flag or (reset - global_reset_offset > 0) or (n_clicks == 0):
@@ -162,6 +166,7 @@ def next_tic(n_clicks, reset):
         global_reset_offset = reset
         global_edge_trace = []
         global_block_list = []
+        global_npc_step = 1
         return initialize()
 
     # Declare local variables
@@ -212,11 +217,15 @@ def update_npc():
                 try:
                     # route = nx.shortest_path(graph, npc_nodes, destination, weight="length")
                     if global_algorithm == 'default':
-                        route = nx.astar_path(global_graph, npc_nodes, global_destination, heuristic=heuristic,
+                        # route = nx.astar_path(global_graph, npc_nodes, global_destination, heuristic=heuristic,
+                        #                       weight="length")
+                        route = algorithms.a_star(global_graph, npc_nodes, global_destination, heuristic=None,
                                               weight="length")
                     else:
                         # Change algorithm here
-                        route = nx.astar_path(global_graph, npc_nodes, global_destination, heuristic=heuristic,
+                        # route = nx.astar_path(global_graph, npc_nodes, global_destination, heuristic=heuristic,
+                        #                       weight="length")
+                        route = algorithms.a_star(global_graph, npc_nodes, global_destination, heuristic=heuristic,
                                               weight="length")
                     if len(route) < 2:
                         npc_updated.append(route[-1])
