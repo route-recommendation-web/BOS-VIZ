@@ -28,10 +28,10 @@ styles = {
     },
     'add-block-disable': {
         'margin-top': '10px',
-        'color': '#555'
+        'background-color': '#fff'
     },
     'add-block-enable': {
         'margin-top': '10px',
-        'color': 'red'
+        'background-color': '#b0e3ff'
     }
 }

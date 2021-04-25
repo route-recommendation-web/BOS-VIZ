@@ -32,11 +32,11 @@ global_edge_trace = []
 # Other variables/consts
 global_damage = 0
 global_destination = list(global_graph.nodes())[5]
-global_time_offset = 0
 global_reset_offset = 0
 global_npc = []
 global_time = 0
 global_block_list = []
+global_npc_step = 1
 INF = math.inf
 
 # Global state
@@ -149,20 +149,17 @@ def next_tic(n_clicks, reset):
     # This function runs whenever user clicks 'play'
     global global_restart_flag
     global global_damage
-    global global_npc
     global global_block_list
     global global_node_trace
     global global_edge_trace
     global global_time
     # Because the n_clicks for 'refresh data' and 'set as destination' never reset, add this offset to avoid bug
     global global_reset_offset
-    global global_time_offset
-
-    if global_restart_flag or (reset - global_reset_offset > 0):
+    if global_restart_flag or (reset - global_reset_offset > 0) or (n_clicks == 0):
         global_restart_flag = False
         global_damage = 0
+        global_time = 0
         global_reset_offset = reset
-        global_time_offset = n_clicks
         global_edge_trace = []
         global_block_list = []
         return initialize()
@@ -170,6 +167,32 @@ def next_tic(n_clicks, reset):
     # Declare local variables
     trace_recode = global_trace_recode.copy()
 
+    # Add destination to the trace_recode
+    trace_recode = draw_destination(trace_recode, global_graph)
+
+    # Update npc locations on global_graph
+    time = update_npc()
+
+    npc_trace = draw_npc(global_npc, global_graph)  # npc fig
+    global_node_trace = npc_trace  # update global npc fig
+    trace_recode += global_edge_trace  # add edge blocking trace to fig
+    trace_recode.append(global_node_trace)  # add npc trace to fig
+
+    # Update time
+    global_time += time
+
+    # Return figure
+    figure = {
+        "data": trace_recode,
+        "layout": update_layout(global_damage, global_time)
+    }
+    return figure
+
+
+def update_npc():
+    global global_npc
+    global global_restart_flag
+    global global_damage
     # Local method
     def heuristic(a, b):  # using distance between nodes for heuristic
         # start_time = time.time()
@@ -179,48 +202,33 @@ def next_tic(n_clicks, reset):
         y3 = global_graph.nodes[b]['y']
         return osmnx.distance.euclidean_dist_vec(y2, x2, y3, x3)
 
-    # Add destination to the trace_recode
-    trace_recode = draw_destination(trace_recode, global_graph)
-
-    # Update npc locations
-    npc_updated = []
-    for npc_nodes in global_npc:
-        if npc_nodes == global_destination:
-            global_damage += 1
-        else:
-            try:
-                # route = nx.shortest_path(graph, npc_nodes, destination, weight="length")
-                if global_algorithm == 'default':
-                    route = nx.astar_path(global_graph, npc_nodes, global_destination, heuristic=heuristic,
-                                          weight="length")
-                else:
-                    # Change algorithm here
-                    route = nx.astar_path(global_graph, npc_nodes, global_destination, heuristic=heuristic,
-                                          weight="length")
-                if len(route) < 2:
-                    npc_updated.append(route[-1])
-                else:
-                    npc_updated.append(route[1])
-            except:
-                print("no path")
-    global_npc = npc_updated
-    if len(global_npc) == 0:
-        global_restart_flag = True
-
-    npc_trace = draw_npc(npc_updated, global_graph)  # npc fig
-    global_node_trace = npc_trace  # update global npc fig
-    trace_recode += global_edge_trace  # add edge blocking trace to fig
-    trace_recode.append(global_node_trace)  # add npc trace to fig
-
-    # Update time
-    global_time = n_clicks - global_time_offset
-
-    # Return figure
-    figure = {
-        "data": trace_recode,
-        "layout": update_layout(global_damage, global_time)
-    }
-    return figure
+    for i in range(global_npc_step):
+        # Update npc locations
+        npc_updated = []
+        for npc_nodes in global_npc:
+            if npc_nodes == global_destination:
+                global_damage += 1
+            else:
+                try:
+                    # route = nx.shortest_path(graph, npc_nodes, destination, weight="length")
+                    if global_algorithm == 'default':
+                        route = nx.astar_path(global_graph, npc_nodes, global_destination, heuristic=heuristic,
+                                              weight="length")
+                    else:
+                        # Change algorithm here
+                        route = nx.astar_path(global_graph, npc_nodes, global_destination, heuristic=heuristic,
+                                              weight="length")
+                    if len(route) < 2:
+                        npc_updated.append(route[-1])
+                    else:
+                        npc_updated.append(route[1])
+                except:
+                    print("no path")
+        global_npc = npc_updated
+        if len(global_npc) == 0:
+            global_restart_flag = True
+            return i
+    return global_npc_step
 
 
 def update_destination(new_dest):
@@ -345,4 +353,10 @@ def update_layout(damage, time):
 def switch_algorithm():
     global global_algorithm
     global_algorithm = 'a_star' if global_algorithm == 'default' else 'default'
-    return u'''The program is currently using the {} algorithm'''.format(global_algorithm)
+    return u'''The program is currently using {} algorithm\nThe npc step is {}'''.format(global_algorithm, global_npc_step)
+
+
+def change_npc_step(selected_step):
+    global global_npc_step
+    global_npc_step = selected_step
+    return u'''The program is currently using {} algorithm\nThe npc step is {}'''.format(global_algorithm, global_npc_step)

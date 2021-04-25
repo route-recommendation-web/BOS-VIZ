@@ -35,11 +35,38 @@ layout = html.Div([
                     html.Div(
                         className="before start",
                         children=[
-                            html.Button('play', id='play-val', n_clicks=0, style=styles['button']),
-                            html.Button('Restart The Game', id='reset', n_clicks=0, style=styles['button']),
-                            html.Button('Switch Algorithm', id='switch-algorithm', n_clicks=0, style=styles['button']),
-                            html.Pre(id='show-dest', style=styles['pre']),
-                            html.Pre(id='show-algorithm', style=styles['pre']),
+                            html.Div(
+                                className='twelve columns',
+                                children=[
+                                    dcc.Markdown(d("""
+                                    **Play Game**
+                            
+                                    Click PLAY button to move NPC\n
+                                    Click Restart to start over
+                                    """)),
+                                    html.Button('play', id='play-val', n_clicks=0, style=styles['button']),
+                                    html.Button('Restart The Game', id='reset', n_clicks=0, style=styles['button']),
+                                ],
+                                style={'height': '280px'}),
+                            html.Div(
+                                className='twelve columns',
+                                children=[
+                                    dcc.Markdown(d("""
+                                    **Game settings**
+                            
+                                    Move your mouse on the slider to change npc step length
+                                    """)),
+                                    dcc.Slider(
+                                        id='step-slider', min=1, max=5, value=1,
+                                        marks={str(i): str(i) for i in range(1, 6)},
+                                        step=1),
+                                    html.Button('Switch Algorithm', id='switch-algorithm', n_clicks=0,
+                                                style=styles['button']),
+                                    html.Button('edit block', id='add-block', n_clicks=0, style=styles['add-block-disable']),
+                                    html.Pre(id='show-dest', style=styles['pre']),
+                                    html.Pre(id='show-algorithm', style=styles['pre'])
+                                ],
+                                style={'height': '400px'}),
                             # html.Div(dcc.Input(id='input-on-play', type='text')),
                             # html.Div(id='container-button-basic',
                             # children='Enter a value and press play')
@@ -69,7 +96,7 @@ layout = html.Div([
                             """)),
                             html.Pre(id='hover-data', style=styles['pre'])
                         ],
-                        style={'height': '400px'}),
+                        style={'height': '380px'}),
 
                     html.Div(
                         className='twelve columns',
@@ -80,8 +107,7 @@ layout = html.Div([
                              Click anywhere on the graph.
                              """)),
                             html.Pre(id='click-data', style=styles['pre']),
-                            html.Button('set as destination', id='set-dest', n_clicks=0, style=styles['button']),
-                            html.Button('edit block', id='add-block', n_clicks=0, style=styles['add-block-disable'])
+                            html.Button('set as destination', id='set-dest', n_clicks=0, style=styles['button'])
                         ],
                         style={'height': '400px'}
                     )

@@ -85,9 +85,21 @@ def enable_add_block(n_clicks):
 
 @app.callback(
     Output('show-algorithm', 'children'),
-    Input('switch-algorithm', 'n_clicks'))
-def switch_algorithm(n_clicks):
-    return utils.switch_algorithm()
+    Input('switch-algorithm', 'n_clicks'),
+    Input('step-slider', 'value'))
+def game_settings(n_clicks, value):
+    ctx = dash.callback_context
+    if not ctx.triggered:
+        button_id = 'switch-algorithm.n_clicks'
+    else:
+        button_id = ctx.triggered[0]['prop_id']
+
+    if button_id == 'switch-algorithm.n_clicks':
+        return utils.switch_algorithm()
+    elif button_id == 'step-slider.value':
+        return utils.change_npc_step(value)
+    else:
+        return dash.no_update
 
 
 if __name__ == '__main__':
