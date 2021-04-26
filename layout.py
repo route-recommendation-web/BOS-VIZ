@@ -63,7 +63,7 @@ layout = html.Div([
                                     html.Button('Switch Algorithm', id='switch-algorithm', n_clicks=0,
                                                 style=styles['button']),
                                     html.Button('edit block', id='add-block', n_clicks=0, style=styles['add-block-disable']),
-                                    html.Pre(id='show-dest', style=styles['pre']),
+                                    # html.Pre(id='show-dest', style=styles['pre']),
                                     html.Pre(id='show-algorithm', style=styles['pre'])
                                 ],
                                 style={'height': '400px'}),
@@ -86,17 +86,17 @@ layout = html.Div([
             html.Div(
                 className="two columns",
                 children=[
-                    html.Div(
-                        className='twelve columns',
-                        children=[
-                            dcc.Markdown(d("""
-                            **Hover Data**
-
-                            Mouse over values in the graph.
-                            """)),
-                            html.Pre(id='hover-data', style=styles['pre'])
-                        ],
-                        style={'height': '380px'}),
+                    # html.Div(
+                    #     className='twelve columns',
+                    #     children=[
+                    #         dcc.Markdown(d("""
+                    #         **Hover Data**
+                    #
+                    #         Mouse over values in the graph.
+                    #         """)),
+                    #         html.Pre(id='hover-data', style=styles['pre'])
+                    #     ],
+                    #     style={'height': '380px'}),
 
                     html.Div(
                         className='twelve columns',
@@ -107,7 +107,8 @@ layout = html.Div([
                              Click anywhere on the graph.
                              """)),
                             html.Pre(id='click-data', style=styles['pre']),
-                            html.Button('set as destination', id='set-dest', n_clicks=0, style=styles['button'])
+                            html.Button('set as destination', id='set-dest', n_clicks=0, style=styles['button']),
+                            html.Pre(id='show-dest', style=styles['pre'])
                         ],
                         style={'height': '400px'}
                     )

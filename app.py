@@ -54,12 +54,12 @@ def update_output(n_clicks, new_dest, reset, clickData, style):
 
 
 ################################callback for right side components
-@app.callback(
-    Output('hover-data', 'children'),
-    Input('my-graph', 'hoverData'))
-def display_hover_data(hoverData):
-    return json.dumps(hoverData, indent=2)
-
+# @app.callback(
+#     Output('hover-data', 'children'),
+#     Input('my-graph', 'hoverData'))
+# def display_hover_data(hoverData):
+#     return json.dumps(hoverData, indent=2)
+#
 
 @app.callback(
     Output('click-data', 'children'),

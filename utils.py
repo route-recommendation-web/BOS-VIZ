@@ -11,8 +11,8 @@ import A_star
 # Initializing variables ##############################################################################################
 #######################################################################################################################
 # Choose city
-global_city = 'brookline'
-global_file_dict = dict(boston=dict(gpickle='boston.gpickle', tracerecode='trace_recode_boston.pkl'),
+global_city = 'boston'
+global_file_dict = dict(boston=dict(gpickle='boston_s.gpickle', tracerecode='trace_recode_boston_s.pkl'),
                         brookline=dict(gpickle='brookline.gpickle', tracerecode='trace_recode_brookline.pkl'))
 global_gp_file = global_file_dict[global_city]['gpickle']
 global_tracerecode_file = global_file_dict[global_city]['tracerecode']
@@ -326,9 +326,9 @@ def draw_destination(trace_recode, graph):
     x, y = graph.nodes[global_destination]['x'], graph.nodes[global_destination]['y']
     hover_text = "Destination" + " id: " + str(global_destination)
     text = "Main Base"
-    trace_recode = [(go.Scatter(x=tuple([x]), y=tuple([y]), hovertext=tuple([hover_text]), mode='markers+text',
-                                text=tuple([text]), textposition="bottom center", hoverinfo="text",
-                                marker={'size': 30, 'color': 'Green'}))] + trace_recode
+    trace_recode.append(go.Scatter(x=tuple([x]), y=tuple([y]), hovertext=tuple([hover_text]), mode='markers+text',
+                                text=tuple([text]), textposition="bottom center", hoverinfo="text",opacity=0.75,
+                                marker={'size': 30, 'color': 'Green'}))
     return trace_recode
 
 
