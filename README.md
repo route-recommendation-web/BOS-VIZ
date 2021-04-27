@@ -1,5 +1,11 @@
 # route-recommendation-web
-
+#####
+- Setup Environment
+```
+pip install virtualenv
+virtualenv --python=python3.7 .venv
+source .venv/bin/activate
+```
 ##### Map Game:
 This is a game that demonstrates A star algorithm on actual maps. It could have some real-life usages like border defense
 etc. 
