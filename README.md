@@ -4,8 +4,10 @@ This code has been tested on MacOS, Python 3.7-3.9, please follow readme to setu
 #####
 - Install conda by following the guide https://conda.io/projects/conda/en/latest/user-guide/install/index.html
 
-- Setup Environment
+- Setup Environment in Terminal
 ```
+git clone https://github.com/route-recommendation-web/boston-pathfinding-visualization.git
+cd boston-pathfinding-visualization
 conda create -n bpv python=3.9
 source activate bpv
 pip install dash
