@@ -40,6 +40,7 @@ global_time = 0
 global_block_list = []
 global_npc_step = 1
 INF = math.inf
+total_blocked = 0
 
 # Global state
 global_restart_flag = False
@@ -198,6 +199,7 @@ def update_npc():
     global global_npc
     global global_restart_flag
     global global_damage
+    global total_blocked
     # Local method
     def heuristic(a, b):  # using distance between nodes for heuristic
         # start_time = time.time()
@@ -233,6 +235,7 @@ def update_npc():
                         npc_updated.append(route[1])
                 except:
                     print("no path")
+                    total_blocked = total_blocked + 1
         global_npc = npc_updated
         if len(global_npc) == 0:
             global_restart_flag = True
@@ -348,7 +351,7 @@ def draw_npc(npc, graph):
 
 
 def update_layout(damage, time):
-    layout = go.Layout(title='Total Damage: ' + str(damage) + ' Time: ' + str(time),
+    layout = go.Layout(title='Total Damage: ' + str(damage) + ' Time: ' + str(time) + ' Blocked NPCs: ' + str(total_blocked),
                        showlegend=False,
                        hovermode='closest',
                        margin={'b': 40, 'l': 40, 'r': 40, 't': 40},

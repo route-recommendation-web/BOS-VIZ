@@ -8,6 +8,7 @@ import styles as st
 from dash.dependencies import Input
 from dash.dependencies import Output
 from dash.dependencies import State
+
 # import pandas as pd
 # from datetime import datetime
 # import A_star
@@ -19,7 +20,8 @@ app.title = "Boston Graph"
 app.layout = lo.layout
 styles = st.styles
 
-###################################callback for left side components
+
+# ##################################callback for left side components
 # @app.callback(
 #     dash.dependencies.Output('my-graph', 'figure'),
 #     [dash.dependencies.Input('my-range-slider', 'value'), dash.dependencies.Input('input1', 'value')])
@@ -40,8 +42,10 @@ styles = st.styles
     State('add-block', 'style'))
 def update_output(n_clicks, new_dest, reset, clickData, style):
     ctx = dash.callback_context
-    if not ctx.triggered: button_id = 'No clicks yet'
-    else: button_id = ctx.triggered[0]['prop_id']
+    if not ctx.triggered:
+        button_id = 'No clicks yet'
+    else:
+        button_id = ctx.triggered[0]['prop_id']
     if button_id == 'my-graph.clickData' and style == styles['add-block-enable']:
         # add block
         return utils.add_block(clickData)
@@ -53,7 +57,7 @@ def update_output(n_clicks, new_dest, reset, clickData, style):
         return dash.no_update
 
 
-################################callback for right side components
+# ###############################callback for right side components
 # @app.callback(
 #     Output('hover-data', 'children'),
 #     Input('my-graph', 'hoverData'))
