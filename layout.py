@@ -78,7 +78,10 @@ layout = html.Div([
             # ###########################################middle graph component
             html.Div(
                 className="eight columns",
-                children=[dcc.Graph(id="my-graph",
+                children=[dcc.ConfirmDialog(
+        id='confirm',
+        message='Game over, restart?',
+    ),dcc.Graph(id="my-graph",
                                     figure=utils.next_tic(0, 1))],
             ),
 

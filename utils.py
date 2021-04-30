@@ -221,7 +221,7 @@ def update_npc():
         y3 = global_graph.nodes[b]['y']
         return osmnx.distance.euclidean_dist_vec(y2, x2, y3, x3)
 
-    for i in range(global_npc_step):
+    for i in range(1):
         # Update npc locations
         npc_updated = []
         for npc_nodes in global_npc:
@@ -248,10 +248,10 @@ def update_npc():
                                                   weight="length")
                         toc = time.perf_counter()
                         runtime = runtime + (toc - tic)
-                    if len(route) < 2:
+                    if len(route) <= global_npc_step + 1:
                         npc_updated.append(route[-1])
                     else:
-                        npc_updated.append(route[1])
+                        npc_updated.append(route[global_npc_step + 1])
                 except:
                     print("no path")
                     total_blocked = total_blocked + 1
@@ -373,7 +373,7 @@ def draw_npc(npc, graph):
 def update_layout(damage, time, blocked):
     layout = go.Layout(
         title='Total Damage: ' + str(damage) + ' Time: ' + str(time) + ' Blocked NPCs: ' + str(blocked) +
-              '\nRuntime: ' + str(runtime)[:6] + 's',
+              '\nLast Runtime: ' + str(runtime)[:6] + 's',
         showlegend=False,
         hovermode='closest',
         margin={'b': 40, 'l': 40, 'r': 40, 't': 80},

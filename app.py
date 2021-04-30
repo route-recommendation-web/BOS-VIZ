@@ -35,6 +35,7 @@ styles = st.styles
 
 @app.callback(
     Output('my-graph', 'figure'),
+    Output('confirm', 'displayed'),
     Input('play-val', 'n_clicks'),
     Input('show-dest', 'children'),
     Input('reset', 'n_clicks'),
@@ -48,13 +49,15 @@ def update_output(n_clicks, new_dest, reset, clickData, style):
         button_id = ctx.triggered[0]['prop_id']
     if button_id == 'my-graph.clickData' and style == styles['add-block-enable']:
         # add block
-        return utils.add_block(clickData)
+        return utils.add_block(clickData), False
     elif button_id == 'play-val.n_clicks' or button_id == 'reset.n_clicks' or button_id == 'show-dest.children':
         # next tic
-        return utils.next_tic(n_clicks, reset)
+        return utils.next_tic(n_clicks, reset), utils.global_restart_flag
+
     else:
         # no update
-        return dash.no_update
+        return dash.no_update, False
+
 
 
 # ###############################callback for right side components
