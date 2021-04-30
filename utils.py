@@ -9,6 +9,7 @@ from colour import Color
 import algorithms
 import A_star
 import time
+from PIL import Image
 
 # Initializing variables ##############################################################################################
 #######################################################################################################################
@@ -44,6 +45,7 @@ global_npc_step = 1
 INF = math.inf
 total_blocked = 0
 runtime = 0
+map = Image.open('map.png')
 
 # Global state
 global_restart_flag = False
@@ -149,6 +151,7 @@ def initialize():
     # Return figure
     figure = {
         "data": trace_recode,
+        # "data": [go.Scatter(x=[0, 0.5, 1, 2, 2.2], y=[1.23, 2.5, 0.42, 3, 1])],
         "layout": update_layout(global_damage, 0)
     }
     return figure
@@ -373,11 +376,23 @@ def update_layout(damage, time):
               '\nRuntime: ' + str(runtime)[:6] + 's',
         showlegend=False,
         hovermode='closest',
-        margin={'b': 40, 'l': 40, 'r': 40, 't': 40},
+        margin={'b': 40, 'l': 40, 'r': 40, 't': 80},
         xaxis={'showgrid': False, 'zeroline': False, 'showticklabels': False},
-        yaxis={'showgrid': False, 'zeroline': False, 'showticklabels': False},
-        height=600,
-        clickmode='event+select')
+        yaxis={'showgrid': False, 'zeroline': False, 'showticklabels': False, 'scaleanchor': 'x', 'scaleratio': 1.15},
+        height= 820,
+        # width=850,
+        clickmode='event+select',
+        images=[{'layer': 'below',
+                 'opacity': 1,
+                 'sizex': 0.2395,  # increase value to extend img on x axis
+                 'sizey': 0.1638,  # increase value to extend img on y axis
+                 'sizing': 'stretch',
+                 'source': map,
+                 'x': -71.20131,  # decrease value to move left
+                 'xref': 'x',
+                 'y': 42.41345,  # decrease value to move down
+                 'yref': 'y'}]
+    )
     return layout
 
 
