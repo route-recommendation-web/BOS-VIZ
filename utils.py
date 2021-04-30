@@ -152,7 +152,7 @@ def initialize():
     figure = {
         "data": trace_recode,
         # "data": [go.Scatter(x=[0, 0.5, 1, 2, 2.2], y=[1.23, 2.5, 0.42, 3, 1])],
-        "layout": update_layout(global_damage, 0)
+        "layout": update_layout(global_damage, 0, 0)
     }
     return figure
 
@@ -198,7 +198,7 @@ def next_tic(n_clicks, reset):
     # Return figure
     figure = {
         "data": trace_recode,
-        "layout": update_layout(global_damage, global_time)
+        "layout": update_layout(global_damage, global_time, total_blocked)
     }
     return figure
 
@@ -324,7 +324,7 @@ def add_block(clickData):
     trace_recode.append(global_node_trace)
     figure = {
         "data": trace_recode,
-        "layout": update_layout(global_damage, global_time)
+        "layout": update_layout(global_damage, global_time, total_blocked)
     }
     return figure
 
@@ -370,9 +370,9 @@ def draw_npc(npc, graph):
     return npc_trace
 
 
-def update_layout(damage, time):
+def update_layout(damage, time, blocked):
     layout = go.Layout(
-        title='Total Damage: ' + str(damage) + ' Time: ' + str(time) + ' Blocked NPCs: ' + str(total_blocked) +
+        title='Total Damage: ' + str(damage) + ' Time: ' + str(time) + ' Blocked NPCs: ' + str(blocked) +
               '\nRuntime: ' + str(runtime)[:6] + 's',
         showlegend=False,
         hovermode='closest',
