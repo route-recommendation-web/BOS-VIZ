@@ -8,6 +8,8 @@ import math
 from colour import Color
 import algorithms
 import A_star
+import time
+
 # Initializing variables ##############################################################################################
 #######################################################################################################################
 # Choose city
@@ -41,6 +43,7 @@ global_block_list = []
 global_npc_step = 1
 INF = math.inf
 total_blocked = 0
+runtime = 0
 
 # Global state
 global_restart_flag = False
@@ -48,6 +51,7 @@ global_enable_add_block = False
 
 # Global algo
 global_algorithm = 'default'
+
 
 # Renderer (not used) #################################################################################################
 #######################################################################################################################
@@ -117,6 +121,7 @@ def network_graph():
     #                         clickmode='event+select',
     #                         )}
     # return figure
+
 
 # Methods #############################################################################################################
 #######################################################################################################################
@@ -200,6 +205,10 @@ def update_npc():
     global global_restart_flag
     global global_damage
     global total_blocked
+    global runtime
+
+    runtime = 0
+
     # Local method
     def heuristic(a, b):  # using distance between nodes for heuristic
         # start_time = time.time()
@@ -221,14 +230,21 @@ def update_npc():
                     if global_algorithm == 'default':
                         # route = nx.astar_path(global_graph, npc_nodes, global_destination, heuristic=heuristic,
                         #                       weight="length")
+                        tic = time.perf_counter()
                         route = algorithms.a_star(global_graph, npc_nodes, global_destination, heuristic=None,
-                                              weight="length")
+                                                  weight="length")
+                        toc = time.perf_counter()
+                        runtime = runtime + (toc - tic)
+
                     else:
                         # Change algorithm here
                         # route = nx.astar_path(global_graph, npc_nodes, global_destination, heuristic=heuristic,
                         #                       weight="length")
+                        tic = time.perf_counter()
                         route = algorithms.a_star(global_graph, npc_nodes, global_destination, heuristic=heuristic,
-                                              weight="length")
+                                                  weight="length")
+                        toc = time.perf_counter()
+                        runtime = runtime + (toc - tic)
                     if len(route) < 2:
                         npc_updated.append(route[-1])
                     else:
@@ -237,6 +253,7 @@ def update_npc():
                     print("no path")
                     total_blocked = total_blocked + 1
         global_npc = npc_updated
+        print(f"Ran in {runtime:0.4f} seconds")
         if len(global_npc) == 0:
             global_restart_flag = True
             return i
@@ -283,11 +300,11 @@ def add_block(clickData):
         if ';startnode:' in click_data:
             start_end = click_data.partition(';startnode:')[2].partition(';endnode:')
             edge = (int(start_end[0]), int(start_end[2]), 0)
-           # try:
-           #      edge_idx = global_block_list.index(edge)
-           #      global_block_list.pop(edge_idx)
-           #      edge_trace.pop(edge_idx)
-           #      graph.edges[edge]['length'] = global_graph_const.edges[edge]['length']
+            # try:
+            #      edge_idx = global_block_list.index(edge)
+            #      global_block_list.pop(edge_idx)
+            #      edge_trace.pop(edge_idx)
+            #      graph.edges[edge]['length'] = global_graph_const.edges[edge]['length']
             if edge not in global_block_list:
                 global_block_list.append(edge)  # could be replaced with hash table to improve performance
                 add_block_item(edge_trace, edge)
@@ -330,8 +347,8 @@ def draw_destination(trace_recode, graph):
     hover_text = "Destination" + " id: " + str(global_destination)
     text = "Main Base"
     trace_recode.append(go.Scatter(x=tuple([x]), y=tuple([y]), hovertext=tuple([hover_text]), mode='markers+text',
-                                text=tuple([text]), textposition="bottom center", hoverinfo="text",opacity=0.75,
-                                marker={'size': 30, 'color': 'Green'}))
+                                   text=tuple([text]), textposition="bottom center", hoverinfo="text", opacity=0.75,
+                                   marker={'size': 30, 'color': 'Green'}))
     return trace_recode
 
 
@@ -351,24 +368,26 @@ def draw_npc(npc, graph):
 
 
 def update_layout(damage, time):
-    layout = go.Layout(title='Total Damage: ' + str(damage) + ' Time: ' + str(time) + ' Blocked NPCs: ' + str(total_blocked),
-                       showlegend=False,
-                       hovermode='closest',
-                       margin={'b': 40, 'l': 40, 'r': 40, 't': 40},
-                       xaxis={'showgrid': False, 'zeroline': False, 'showticklabels': False},
-                       yaxis={'showgrid': False, 'zeroline': False, 'showticklabels': False},
-                       height=600,
-                       clickmode='event+select')
+    layout = go.Layout(
+        title='Total Damage: ' + str(damage) + ' Time: ' + str(time) + ' Blocked NPCs: ' + str(total_blocked) +
+              '\nRuntime: ' + str(runtime)[:6] + 's',
+        showlegend=False,
+        hovermode='closest',
+        margin={'b': 40, 'l': 40, 'r': 40, 't': 40},
+        xaxis={'showgrid': False, 'zeroline': False, 'showticklabels': False},
+        yaxis={'showgrid': False, 'zeroline': False, 'showticklabels': False},
+        height=600,
+        clickmode='event+select')
     return layout
 
 
 def switch_algorithm():
     global global_algorithm
     global_algorithm = 'a_star' if global_algorithm == 'default' else 'default'
-    return u'''The program is currently using {} algorithm\nThe npc step is {}'''.format(global_algorithm, global_npc_step)
+    return u'''Current Algorithm: {}\nNPC step: {}'''.format(global_algorithm, global_npc_step)
 
 
 def change_npc_step(selected_step):
     global global_npc_step
     global_npc_step = selected_step
-    return u'''The program is currently using {} algorithm\nThe npc step is {}'''.format(global_algorithm, global_npc_step)
+    return u'''Current Algorithm: {}\nNPC step: {}'''.format(global_algorithm, global_npc_step)
