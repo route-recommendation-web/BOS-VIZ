@@ -175,7 +175,7 @@ def next_tic(n_clicks, reset):
         global_reset_offset = reset
         global_edge_trace = []
         global_block_list = []
-        global_npc_step = 1
+        # global_npc_step = 1
         return initialize()
 
     # Declare local variables
