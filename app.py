@@ -16,7 +16,7 @@ from dash.dependencies import State
 # import the css template, and pass the css template into dash
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
-app.title = "Boston Graph"
+app.title = "Boston Pathfinding Visualization"
 app.layout = lo.layout
 styles = st.styles
 

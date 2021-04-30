@@ -7,7 +7,7 @@ from textwrap import dedent as d
 styles = st.styles
 layout = html.Div([
     # ########################Title
-    html.Div([html.H1("Boston Graph")],
+    html.Div([html.H1("Boston Pathfinding Visualization")],
              className="row",
              style={'textAlign': "center"}),
     # ############################################################################################define the row
@@ -62,7 +62,7 @@ layout = html.Div([
                                         step=1),
                                     html.Button('Switch Algorithm', id='switch-algorithm', n_clicks=0,
                                                 style=styles['button']),
-                                    html.Button('edit block', id='add-block', n_clicks=0, style=styles['add-block-disable']),
+                                    html.Button('add block', id='add-block', n_clicks=0, style=styles['add-block-disable']),
                                     # html.Pre(id='show-dest', style=styles['pre']),
                                     html.Pre(id='show-algorithm', style=styles['pre'])
                                 ],
