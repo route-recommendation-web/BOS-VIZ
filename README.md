@@ -22,7 +22,7 @@ python app.py
 ```
 - Dash is running on http://127.0.0.1:8050/ 
 
-##### Link to our project report:
+##### Link to our project report: https://docs.google.com/document/d/1vwyzTjS-23OpEgKiY0HkQIxwvrMufNBTEEre_PpNKOM/edit?usp=sharing
 
 ##### References:
 https://github.com/gboeing/osmnx
